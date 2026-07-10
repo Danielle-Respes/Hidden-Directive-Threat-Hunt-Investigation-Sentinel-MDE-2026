@@ -1,4 +1,5 @@
-[Hidden-Directive-README.md](https://github.com/user-attachments/files/29908103/Hidden-Directive-README.md)
+<img width="1017" height="362" alt="Screenshot 2026-07-10 at 7 14 45 PM" src="https://github.com/user-attachments/assets/acc8293c-157c-4912-9139-c458125b3c87" />
+
 # Hidden Directive — Live Threat Hunt Investigation
 ## Microsoft Sentinel + Microsoft Defender for Endpoint | LOG(N) Pacific Cyber Range | 2026
 
