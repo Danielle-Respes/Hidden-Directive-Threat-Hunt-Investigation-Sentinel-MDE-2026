@@ -8,13 +8,24 @@ This repository is dedicated to the "Hidden Directive" Threat Hunt Investigation
 
 ---
 
-## Practice and Community Learning
+## Peer Review & Methodology Validation
+> I believe real expertise is built by subjecting my analysis to peer scrutiny. 
 
-> I believe real expertise is built in the noise by navigating real telemetry and dead ends to understand the why behind the data.
+**Community Collaboration:** I actively participate in Wednesday community sessions to pressure-test my hunting logic and compare pivot methodologies against peer workflows.
 
-**Methodology:** I am focusing on iterative query refinement, pivot analysis, and reducing signal noise within complex datasets. I prioritize "passive" hunting techniques to ensure that investigation activities do not disrupt critical system uptime.
+**Validation Strategy:** Post-investigation, all findings and detection logic are subjected to peer review to ensure accuracy, reduce bias, and refine my hunting patterns for professional SOC environments.
 
-**Compliance Alignment:** My investigation will be aligned with the NIST Cybersecurity Framework (CSF), specifically focusing on the Detect, Respond, and Recover functions.
+---
+
+## Incident Report
+**Full technical findings, timeline, and forensic evidence are documented in the following report:**
+> **[View the Formal Incident Report](Incident-Report.md)** (pending)
+---
+## Investigation Lifecycle
+*   **Phase 1 (Preparation):** Environment baselining, scope definition, and hypothesis generation.
+*   **Phase 2 (Active Hunting):** Real-time triage, telemetry analysis, and iterative query refinement.
+*   **Phase 3 (Reporting):** Evidence distillation, incident formalization, and detection engineering (writing the rules).
+*   **Phase 4 (Continuous Improvement):** Peer review, feedback integration, and updating logic based on community debriefs.
 
 ---
 
