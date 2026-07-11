@@ -81,5 +81,9 @@ findings into business-impact reports for leadership.
 
 **For Remote Roles:** Proves effective asynchronous communication skills. This report is structured as a standalone artifact — providing clear, actionable data that requires minimal 
 clarification, mirroring the standard for high-performance remote teams.
+
+
+[Portfolio](https://github.com/Danielle-Respes) &nbsp;|&nbsp; [LinkedIn](https://www.linkedin.com/in/danielle-respes-64113767/)
   
-*LOG(N) Pacific Cyber Range // Hidden Directive // GF-INC-2026-0704 // Built by SancLogic*
+
+*LOG(N) Pacific Cyber Range // Hidden Directive // Built by SancLogic*
