@@ -8,16 +8,27 @@ This repository is dedicated to the "Hidden Directive" Threat Hunt Investigation
 
 ---
 
-## Preparation and Professional Intent
+## Practice and Community Learning
 
-**Objective:** My goal for this investigation is to demonstrate a methodical, SOC-standard approach to incident triage, threat hunting, and technical report writing.
+> I believe real expertise is built in the noise by navigating real telemetry and dead ends to understand the why behind the data.
 
-**Compliance Framework:** My investigation will be aligned with the NIST Cybersecurity Framework (CSF), specifically focusing on the Detect, Respond, and Recover functions to ensure findings are relevant to government and enterprise security standards.
+**Methodology:** I am focusing on iterative query refinement, pivot analysis, and reducing signal noise within complex datasets. I prioritize "passive" hunting techniques to ensure that investigation activities do not disrupt critical system uptime.
 
-**Operational Focus:** I am utilizing this exercise to build muscle memory in:
-*   **Active Incident Triage:** Managing a real-time alert queue.
-*   **Telemetry Analysis:** Pivoting through KQL to identify adversary TTPs.
-*   **Technical Documentation:** Producing professional Incident Reports suitable for stakeholder review.
+**Compliance Alignment:** My investigation will be aligned with the NIST Cybersecurity Framework (CSF), specifically focusing on the Detect, Respond, and Recover functions.
+
+---
+
+## Pre-Investigation Planning & Methodology
+
+> Before the live incident queue drops on July 18, I am establishing the following investigative baseline to ensure a structured response. 
+> 
+> *Note: I am currently finalizing an active threat hunt (Northpeak Descent) through July 17.*
+
+> **July 10:** Reviewed event requirements and confirmed environment access protocols. Initial setup of report template and evidence logging structure.
+>
+> **July 11–17:** Baseline study of LOG(N) telemetry documentation; reviewing APT TTPs relevant to industrial infrastructure.
+>
+> **July 18 (Launch):** Transitioning focus exclusively to the Hidden Directive live incident queue.
 
 ---
 
@@ -28,16 +39,6 @@ This repository is dedicated to the "Hidden Directive" Threat Hunt Investigation
 > **Investigation Window:** July 18 – August 1, 2026
 >
 > **Report Deadline:** August 15, 2026
-
----
-
-## Tracking & Methodology
-
-*This repository will be updated live as the investigation progresses. Follow along as I document the triage process, KQL refinement, and final incident analysis.*
-
-**Investigation Logs:** (Links to daily notes will be added post-launch).
-
-**Incident Report:** (The final report will be available here after August 15, 2026).
 
 ---
 
@@ -52,4 +53,6 @@ This repository is dedicated to the "Hidden Directive" Threat Hunt Investigation
 ## Objective
 
 By participating in the Hidden Directive investigation, I am building the analytical rigor and professional communication skills required for a Cyber Defense Analyst or GRC-focused role.
+
+
 *LOG(N) Pacific Cyber Range // Hidden Directive // GF-INC-2026-0704 // Built by SancLogic*
