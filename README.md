@@ -80,7 +80,7 @@ This repository is dedicated to the "Hidden Directive" Threat Hunt Investigation
 
 *   **Remote Work Evidence:** This report is written for clarity and asynchronous consumption. By documenting my thought process and providing high-fidelity logs, I ensure that my work is fully transparent and actionable for any team member, regardless of their location.
 
-
+<div align="center">
 [Portfolio](https://github.com/Danielle-Respes) &nbsp;|&nbsp; [LinkedIn](https://www.linkedin.com/in/danielle-respes-64113767/)
   
 
