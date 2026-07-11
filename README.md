@@ -70,4 +70,16 @@ This repository is dedicated to the "Hidden Directive" Threat Hunt Investigation
 *   **GRC Analyst Lens:** I view incidents through the lens of risk and compliance. I identify the specific security controls (NIST CSF) impacted and translate technical findings into business-impact summaries suitable for leadership.
 
 *   **Remote Work Evidence:** This report is written for clarity and asynchronous consumption. By documenting my thought process and providing high-fidelity logs, I ensure that my work is fully transparent and actionable for any team member, regardless of their location.
+
+## Career Signal — What This Demonstrates
+
+**For SOC Roles:** Demonstrates end-to-end incident response, including multi-SIEM telemetry correlation (Sentinel/MDE), KQL-based pivot analysis, and proactive detection engineering 
+developed from confirmed investigation findings.
+
+**For GRC Roles:** Demonstrates adherence to the NIST Cybersecurity Framework (Detect, Respond, Recover), formal incident documentation, and the ability to translate technical 
+findings into business-impact reports for leadership.
+
+**For Remote Roles:** Proves effective asynchronous communication skills. This report is structured as a standalone artifact — providing clear, actionable data that requires minimal 
+clarification, mirroring the standard for high-performance remote teams.
+  
 *LOG(N) Pacific Cyber Range // Hidden Directive // GF-INC-2026-0704 // Built by SancLogic*
