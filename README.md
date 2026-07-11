@@ -61,9 +61,13 @@ This repository is dedicated to the "Hidden Directive" Threat Hunt Investigation
 
 **Endpoint Analysis:** Microsoft Defender for Endpoint (MDE)
 
-## Objective
+## Role-Specific Takeaways
 
-By participating in the Hidden Directive investigation, I am building the analytical rigor and professional communication skills required for a Cyber Defense Analyst or GRC-focused role.
+> I approach every investigation by considering the unique priorities of the security team.
 
+*   **SOC Analyst Lens:** My methodology focuses on reducing "mean time to detect" (MTTD). In this investigation, I demonstrate how KQL pivoting moved me from initial alert to confirmed attacker command line. Each report includes a proposed detection rule to automate future defenses.
 
+*   **GRC Analyst Lens:** I view incidents through the lens of risk and compliance. I identify the specific security controls (NIST CSF) impacted and translate technical findings into business-impact summaries suitable for leadership.
+
+*   **Remote Work Evidence:** This report is written for clarity and asynchronous consumption. By documenting my thought process and providing high-fidelity logs, I ensure that my work is fully transparent and actionable for any team member, regardless of their location.
 *LOG(N) Pacific Cyber Range // Hidden Directive // GF-INC-2026-0704 // Built by SancLogic*
