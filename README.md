@@ -26,6 +26,13 @@ I document each question as I solve it: the query I ran, what I found, and how I
 
 
 
+
+---
+## Peer review
+
+After each hunt I bring my findings and sticking points to the LOG(N) community debrief sessions to pressure-test my reasoning against other analysts.
+
+
 <div align="center">
 [Portfolio](https://github.com/Danielle-Respes) &nbsp;|&nbsp; [LinkedIn](https://www.linkedin.com/in/danielle-respes-64113767/)
   
