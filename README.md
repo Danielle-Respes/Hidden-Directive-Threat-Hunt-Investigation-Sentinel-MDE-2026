@@ -75,7 +75,7 @@ AzureActivity
 | where OperationName == "MICROSOFT.COMPUTE/VIRTUALMACHINES/DEALLOCATE/ACTION"
 | where Caller == "5deb2a08-7269-47d6-896b-8bc52d396466"
 | where CallerIpAddress == "4.153.100.221"
-```
+
 
 Service Principal with Contributor role initiates VM Run Command from IP 4.153.100.221.
 
@@ -83,18 +83,21 @@ Service Principal with Contributor role initiates VM Run Command from IP 4.153.1
 
 **10:01:34 AM** — Payload Execution (LAW-SilentCorridor)
 
-```kql
 WindowsProcess_CL
 | where DvcHostname == "GF-WS01.greenfield.local"
 | where TargetProcessCommandLine contains "script49.ps1"
 | where ActorUsername == "NT AUTHORITY\SYSTEM"
-```
 
 PowerShell executes script49.ps1 with SYSTEM privileges and unrestricted execution policy.
 
 ---
 
-**10:01:35 AM** — Persistence Established
+**10:01:35 AM** — Persistence Established (LAW-SilentCorridor)
+
+WindowsAccountMgmt_CL
+| where DvcHostname == "GF-WS01.greenfield.local"
+| where EventID == 4720 or TargetProcessCommandLine has_any ("net user", "net localgroup")
+| project TimeGenerated, DvcHostname, TargetUserName, TargetProcessCommandLine, ActorUsername
 
 Backdoor admin account created for future access.
 
