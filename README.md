@@ -370,6 +370,38 @@ Located via Defender XDR → Device Timeline → Process Events + Scheduled Task
 
 ---
 
+## C05 — Privilege Escalation
+
+Privilege escalation from sancadmin (user) to SYSTEM via token modification and DLL side-loading.
+
+---
+
+### Finding: StoreDesktopExtension.exe Token Modification → SYSTEM cmd.exe Execution
+
+**Initial Access:** Jul 4, 2026 9:55:00.341 PM | **User:** gf-ws01\sancadmin | **Action:** Token Modified
+
+**Escalation to SYSTEM:** Jul 4, 2026 9:55:00.500 PM | **User:** NT AUTHORITY\SYSTEM | **Action:** Process Created
+
+<details>
+<summary><b>→ View Defender Timeline Evidence</b></summary>
+
+![Defender Timeline: Privilege Escalation Chain](evidence/c05-privilege-escalation.png)
+
+**Step 1 (9:55:00.341 PM):** sancadmin modifies StoreDesktopExtension.exe access token  
+**Step 2 (9:55:00.500 PM):** CollectGuestLogs.exe (SYSTEM process) launches cmd.exe as NT AUTHORITY\SYSTEM  
+Process Chain: services.exe → WaAppAgent.exe → CollectGuestLogs.exe → cmd.exe
+
+</details>
+
+Sancadmin modifies a file token, allowing a legitimate SYSTEM process (CollectGuestLogs.exe) to execute arbitrary commands with elevated privileges.
+
+**Why this technique is stealthy:** No service installation or modification events are generated. Standard detection would miss this.
+
+**MITRE ATT&CK:** T1134 (Access Token Manipulation) + T1574 (DLL Side-Loading)
+
+---
+---
+
 **[Portfolio](https://github.com/Danielle-Respes)** • **[LinkedIn](https://www.linkedin.com/in/danielle-respes-64113767/)**
 
 *LOG(N) Pacific Cyber Range // Hidden Directive // Built by SancLogic*
