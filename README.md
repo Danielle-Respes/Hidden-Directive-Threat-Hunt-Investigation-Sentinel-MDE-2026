@@ -306,6 +306,68 @@ $t = [W.K]::CreateThread([IntPtr]::Zero,0,$mem,[IntPtr]::Zero,0,[IntPtr]::Zero)
 
 These are for C04 (Impact Analysis).
 
+
+---
+## C04 — Persistence Mechanisms
+
+Two persistence mechanisms deployed across the estate. One deleted via standard remediation. One survives password reset.
+
+---
+
+### Finding 1: sancadmin Local Admin Account (GF-WS01)
+
+**Timestamp:** Jul 4, 2026 6:01:35 AM | **User:** NT AUTHORITY\SYSTEM | **Status:** Easily Removable
+
+<details>
+<summary><b>→ View Defender Timeline Evidence</b></summary>
+
+![Defender Timeline: sancadmin account creation](evidence/c04-sancadmin.png)
+
+Event: net1.exe enumerated Local Group membership of GF-WS01\sancadmin  
+Process Chain: powershell.exe → net.exe → net1.exe → sancadmin
+
+</details>
+
+Created via PowerShell → net.exe during initial payload execution. Standard local account persistence.
+
+**Remediation:**
+```cmd
+net user sancadmin /delete
+```
+
+---
+
+### Finding 2: WindowsUpdate Scheduled Task (GF-SRV01) — Survives Password Reset
+
+**Timestamp:** Jul 4, 2026 9:11:20 AM | **User:** GREENFIELD\t.harris | **Status:** Password Reset Won't Remove This
+
+<details>
+<summary><b>→ View Defender Timeline Evidence</b></summary>
+
+![Defender Timeline: WindowsUpdate task creation](evidence/c04-windowsupdate.png)
+
+Event: powershell.exe created scheduled task WindowsUpdate via schtasks.exe  
+Process Chain: userinit.exe → explorer.exe → powershell.exe → schtasks.exe  
+Execution Context: Task runs as NT AUTHORITY\SYSTEM
+
+</details>
+
+Scheduled task runs as SYSTEM (not tied to user account). Standard domain password reset leaves this active.
+
+**Why it persists:** Domain password reset only invalidates user credentials, not task configurations running as SYSTEM.
+
+**Required Remediation:**
+```cmd
+schtasks /delete /tn WindowsUpdate /f
+del C:\Windows\Temp\srv.exe
+```
+
+---
+
+### Investigation Method
+
+Located via Defender XDR → Device Timeline → Process Events + Scheduled Task Events filters on affected hosts.
+
 ---
 
 **[Portfolio](https://github.com/Danielle-Respes)** • **[LinkedIn](https://www.linkedin.com/in/danielle-respes-64113767/)**
