@@ -9,7 +9,7 @@
 ---
 
 
-### 📌 Executive Summary
+### Executive Summary
 
 | Category | Details |
 | :--- | :--- |
@@ -146,6 +146,7 @@ WindowsProcess_CL
 
 ### Execution Flow
 
+
 ```mermaid
 graph TD
     A["loader.ps1 Executes"] --> B["Step 1: AMSI Bypass"]
@@ -155,7 +156,6 @@ graph TD
     E --> F["Step 5: Inject Shellcode"]
     F --> G["Step 6: Execute via Thread"]
 ```
-
 ---
 
 ### What I Found
