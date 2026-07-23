@@ -62,59 +62,73 @@ union withsource=SourceTable *
 
 ---
 
-
 ## C02 — Initial Access: Compromised Azure Service Principal
 
 **Attack Method:** Azure Run Command via compromised Service Principal with Contributor role
 
-**Timeline:**
+---
+
+### Timeline
 
 **8:01 AM** — Azure Management Operation (LAW-Cyber-Range)
+
 ```kql
 AzureActivity
 | where OperationName == "MICROSOFT.COMPUTE/VIRTUALMACHINES/DEALLOCATE/ACTION"
 | where Caller == "5deb2a08-7269-47d6-896b-8bc52d396466"
 | where CallerIpAddress == "4.153.100.221"
+```
 
-
-Service Principal with Contributor role initiates VM Run Command from IP 4.153.100.221.
+**Result:** Service Principal with Contributor role initiates VM Run Command from IP 4.153.100.221.
 
 ---
 
 **10:01:34 AM** — Payload Execution (LAW-SilentCorridor)
 
+```kql
 WindowsProcess_CL
 | where DvcHostname == "GF-WS01.greenfield.local"
 | where TargetProcessCommandLine contains "script49.ps1"
 | where ActorUsername == "NT AUTHORITY\SYSTEM"
+| project TimeGenerated, ActorUsername, TargetProcessCommandLine
+```
 
-PowerShell executes script49.ps1 with SYSTEM privileges and unrestricted execution policy.
+**Result:** PowerShell executes script49.ps1 with SYSTEM privileges and unrestricted execution policy.
 
 ---
 
 **10:01:35 AM** — Persistence Established (LAW-SilentCorridor)
 
-WindowsAccountMgmt_CL
+```kql
+WindowsProcess_CL
 | where DvcHostname == "GF-WS01.greenfield.local"
-| where EventID == 4720 or TargetProcessCommandLine has_any ("net user", "net localgroup")
-| project TimeGenerated, DvcHostname, TargetUserName, TargetProcessCommandLine, ActorUsername
+| where TargetProcessCommandLine has_any ("net user sancadmin", "net localgroup")
+| where TimeGenerated between (datetime(2026-07-04 10:01:35) .. datetime(2026-07-04 10:01:36))
+| project TimeGenerated, ActorUsername, TargetProcessCommandLine
+```
 
-Backdoor admin account created for future access.
+**Result:**
+
+10:01:35.466 AM | NT AUTHORITY\SYSTEM | net.exe user sancadmin ChangeThis2026fix
+
+10:01:35.783 AM | NT AUTHORITY\SYSTEM | net.exe user sancadmin /active:yes
+
+---
+
+### MITRE ATT&CK Mapping
+
+| Timestamp | Tactic | Technique | Action |
+|-----------|--------|-----------|--------|
+| 8:01 AM | Initial Access | T1078 (Valid Accounts) | Compromised Service Principal |
+| 10:01:34 AM | Execution | T1059 (Command Execution) | script49.ps1 via PowerShell |
+| 10:01:35 AM | Persistence | T1136 (Create Account) | sancadmin local admin account |
+
+**Evidence Sources:** LAW-Cyber-Range (Azure management logs) + LAW-SilentCorridor (Windows process telemetry)
+
+
 
 ---
 
-**MITRE ATT&CK:** T1078 (Valid Accounts) → T1059 (Command Execution) → T1136 (Create Account)
-
-**Evidence:** LAW-Cyber-Range (Azure logs) + LAW-SilentCorridor (process telemetry)
-
-
----
-
-
-
----
-<div align="center">
-[Portfolio](https://github.com/Danielle-Respes) &nbsp;|&nbsp; [LinkedIn](https://www.linkedin.com/in/danielle-respes-64113767/)
-  
+**[Portfolio](https://github.com/Danielle-Respes)** • **[LinkedIn](https://www.linkedin.com/in/danielle-respes-64113767/)**
 
 *LOG(N) Pacific Cyber Range // Hidden Directive // Built by SancLogic*
