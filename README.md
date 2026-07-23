@@ -2,8 +2,23 @@
 
 # Hidden Directive — DFIR Investigation (GF-INC-2026-0704)
 
+
 **Tools:** Microsoft Sentinel · Defender XDR · KQL
 **Author:** Danielle Respes · [LinkedIn](https://www.linkedin.com/in/danielle-respes-64113767/)
+
+---
+
+
+### 📌 Executive Summary
+
+| Category | Details |
+| :--- | :--- |
+| **Initial Access Vector** | Compromised Azure Service Principal (`5deb2a08...`) via Run Command |
+| **Impact & Breadth** | `SYSTEM`-level code execution on `GF-WS01` & backdoor persistence established |
+| **Scope & Telemetry** | 3 endpoints (`GF-WS01`, `GF-SRV01`, `GF-DC01`) · Microsoft Sentinel & Defender XDR |
+
+---
+
 
 ## About this case
 
@@ -44,6 +59,54 @@ union withsource=SourceTable *
 **Found:** Confirmed access and scoping. Available tables for the incident: WindowsAuth_CL, WindowsNetwork_CL, WindowsProcess_CL, WindowsFile_CL, WindowsRegistry_CL, WindowsDNS_CL, WindowsService_CL, WindowsAccountMgmt_CL.
 
 **Reasoning:** Confirming scope first (correct workspace, working host filter, right time window) prevents pulling other estates' data and maps which telemetry is available before hunting.
+
+---
+
+
+## C02 — Initial Access: Compromised Azure Service Principal
+
+**Attack Method:** Azure Run Command via compromised Service Principal with Contributor role
+
+**Timeline:**
+
+**8:01 AM** — Azure Management Operation (LAW-Cyber-Range)
+```kql
+AzureActivity
+| where OperationName == "MICROSOFT.COMPUTE/VIRTUALMACHINES/DEALLOCATE/ACTION"
+| where Caller == "5deb2a08-7269-47d6-896b-8bc52d396466"
+| where CallerIpAddress == "4.153.100.221"
+```
+
+Service Principal with Contributor role initiates VM Run Command from IP 4.153.100.221.
+
+---
+
+**10:01:34 AM** — Payload Execution (LAW-SilentCorridor)
+
+```kql
+WindowsProcess_CL
+| where DvcHostname == "GF-WS01.greenfield.local"
+| where TargetProcessCommandLine contains "script49.ps1"
+| where ActorUsername == "NT AUTHORITY\SYSTEM"
+```
+
+PowerShell executes script49.ps1 with SYSTEM privileges and unrestricted execution policy.
+
+---
+
+**10:01:35 AM** — Persistence Established
+
+Backdoor admin account created for future access.
+
+---
+
+**MITRE ATT&CK:** T1078 (Valid Accounts) → T1059 (Command Execution) → T1136 (Create Account)
+
+**Evidence:** LAW-Cyber-Range (Azure logs) + LAW-SilentCorridor (process telemetry)
+
+
+---
+
 
 
 ---
