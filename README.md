@@ -35,7 +35,20 @@ This is a live-incident DFIR case, not a flag hunt. I work it in phases and docu
 - **Endpoint telemetry:** Microsoft Defender XDR
 - **Query language:** KQL (Kusto Query Language)
 
+
 ---
+## Attack Flow Diagram
+
+```mermaid
+graph LR
+    Attacker[Attacker / 4.153.100.221] -->|Azure Run Command| SP[Service Principal]
+    SP -->|script49.ps1 / SYSTEM| WS[GF-WS01]
+    WS -->|Backdoor Admin| Persistence[Persistence Established]
+    WS -.->|In Progress| SRV[GF-SRV01]
+    WS -.->|In Progress| DC[GF-DC01]
+```
+---
+
 
 ## Investigation
 
