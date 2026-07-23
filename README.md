@@ -39,14 +39,8 @@ This is a live-incident DFIR case, not a flag hunt. I work it in phases and docu
 ---
 ## Attack Flow Diagram
 
-```mermaid
-graph LR
-    Attacker[Attacker / 4.153.100.221] -->|Azure Run Command| SP[Service Principal]
-    SP -->|script49.ps1 / SYSTEM| WS[GF-WS01]
-    WS -->|Backdoor Admin| Persistence[Persistence Established]
-    WS -.->|In Progress| SRV[GF-SRV01]
-    WS -.->|In Progress| DC[GF-DC01]
-```
+<img width="722" height="165" alt="image" src="https://github.com/user-attachments/assets/0192d3b7-9634-4029-a77e-b1e17228a2a4" />
+
 ---
 
 
