@@ -423,6 +423,48 @@ Sancadmin modifies a file token, allowing a legitimate SYSTEM process (CollectGu
 
 **Why This Matters:** This is sophisticated evasion because it abuses a legitimate, signed Windows process. Detection systems trust Microsoft-signed executables, so the tampering goes unnoticed.
 
+---
+
+## C07 — Credential Access
+
+```mermaid
+graph LR
+    subgraph Escalation["Privilege Escalation"]
+        A["SYSTEM Access<br/>Achieved"]
+    end
+
+    subgraph Harvest["Credential Harvesting"]
+        B["LSASS Memory<br/>Dump"]
+        F["Credential Manager<br/>Extraction"]
+        G["PowerShell History<br/>Recovery"]
+    end
+
+    subgraph Exploit["Exploitation"]
+        C["Domain Creds<br/>Harvested"]
+    end
+
+    subgraph Impact["Impact"]
+        D["Domain Admin<br/>Access Gained"]
+        E["Lateral Movement<br/>→ DC01"]
+    end
+
+    A --> B
+    A --> F
+    A --> G
+    B --> C
+    F --> C
+    G --> C
+    C --> D
+    D --> E
+
+    classDef escalation fill:#fef3c7,stroke:#d97706,stroke-width:2px,color:#78350f
+    classDef harvest fill:#fee2e2,stroke:#dc2626,stroke-width:2px,color:#7f1d1d
+    classDef impact fill:#f3e8ff,stroke:#9333ea,stroke-width:2px,color:#581c87
+
+    class A escalation
+    class B,F,G harvest
+    class C,D,E impact
+```
 
 
 ---
