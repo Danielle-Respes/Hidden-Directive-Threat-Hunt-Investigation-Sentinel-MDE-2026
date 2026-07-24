@@ -481,9 +481,13 @@ Sancadmin modifies a file token, allowing a legitimate SYSTEM process (CollectGu
 ## C07 — Credential Access
 
 <img width="1536" height="1024" alt="Cartoon of summary of story" src="https://github.com/user-attachments/assets/dae2e56a-25d0-4104-84ae-e3c4f6e3592a" />
-
+The short version, before the technical breakdown: the attacker found a password safe, opened it, and walked out with the keys to the whole network.
 
 Multiple credential access techniques used simultaneously — each with its own evidence trail in telemetry.
+
+---
+
+
 ```mermaid
 graph LR
     subgraph Escalation["Privilege Escalation"]
@@ -607,8 +611,7 @@ AD Description fields often contain backup credentials or notes with plaintext p
 ✅ KeePass → Master password + all stored passwords  
 ✅ AD Query → Account enumeration with description field harvesting  
 
-**Result:** Full domain admin access achieved → Lateral movement to DC01 ready
- 
+**Result:** Domain admin credentials in hand → sets up lateral movement to DC01
 ---
 
 **[Portfolio](https://github.com/Danielle-Respes)** • **[LinkedIn](https://www.linkedin.com/in/danielle-respes-64113767/)**
