@@ -400,6 +400,31 @@ Sancadmin modifies a file token, allowing a legitimate SYSTEM process (CollectGu
 **MITRE ATT&CK:** T1134 (Access Token Manipulation) + T1574 (DLL Side-Loading)
 
 ---
+
+## C06 — Defense Evasion: Defender Tampering via Process Hijacking
+
+### Finding: aggregatorhost.exe (Hijacked) Disables Defender WhqlOnlyEvaluation
+
+**Timestamp:** Jul 8, 2026 10:00:55 PM | **User:** NT AUTHORITY\SYSTEM | **Action:** Registry Modified
+
+<details>
+<summary><b>→ View Defender Timeline Evidence (3-part chain)</b></summary>
+
+<img width="1075" height="420" alt="c06-defender-tamper" src="https://github.com/user-attachments/assets/ef5c0472-0815-4d24-b0b0-3f26fd9506ae" />
+
+
+**Process Chain:** services.exe → svchost.exe → aggregatorhost.exe → Registry Modification
+
+**Registry Key Modified:** HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Control\CI\WhqlOnlyEvaluation
+
+**Critical Detail:** aggregatorhost.exe is signed by Microsoft Windows (legitimate process), but attacker injected code into it. Defender sees a trusted system process modifying security settings, so it doesn't flag it as suspicious.
+
+</details>
+
+**Why This Matters:** This is sophisticated evasion because it abuses a legitimate, signed Windows process. Detection systems trust Microsoft-signed executables, so the tampering goes unnoticed.
+
+
+
 ---
 
 **[Portfolio](https://github.com/Danielle-Respes)** • **[LinkedIn](https://www.linkedin.com/in/danielle-respes-64113767/)**
