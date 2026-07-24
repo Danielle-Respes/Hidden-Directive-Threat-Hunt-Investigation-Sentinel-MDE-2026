@@ -146,16 +146,30 @@ WindowsProcess_CL
 
 ### Execution Flow
 
-
 ```mermaid
 graph TD
-    A["loader.ps1 Executes"] --> B["Step 1: AMSI Bypass"]
-    B --> C["Step 2: Download Shellcode"]
-    C --> D["Step 3: XOR Decrypt"]
-    D --> E["Step 4: Allocate Memory"]
-    E --> F["Step 5: Inject Shellcode"]
-    F --> G["Step 6: Execute via Thread"]
+    A["loader.ps1<br/>Executes"] --> B["Step 1<br/>AMSI Bypass"]
+    B --> C["Step 2<br/>Download Shellcode"]
+    C --> D["Step 3<br/>XOR Decrypt"]
+    D --> E["Step 4<br/>Allocate Memory"]
+    E --> F["Step 5<br/>Inject Shellcode"]
+    F --> G["Step 6<br/>Execute via Thread"]
+
+    classDef entry fill:#e0e7ff,stroke:#4338ca,stroke-width:2px,color:#1e1b4b
+    classDef evasion fill:#fee2e2,stroke:#dc2626,stroke-width:2px,color:#7f1d1d
+    classDef stage fill:#fef3c7,stroke:#d97706,stroke-width:2px,color:#78350f
+    classDef exec fill:#dcfce7,stroke:#16a34a,stroke-width:2px,color:#14532d
+
+    class A entry
+    class B evasion
+    class C,D,E,F stage
+    class G exec
 ```
+
+
+  
+
+
 ---
 
 ### What I Found
