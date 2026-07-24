@@ -1,10 +1,18 @@
-<img width="1017" height="362" alt="Screenshot 2026-07-10 at 7 14 45 PM" src="https://github.com/user-attachments/assets/acc8293c-157c-4912-9139-c458125b3c87" />
-
 # Hidden Directive — DFIR Investigation (GF-INC-2026-0704)
 
+![Status](https://img.shields.io/badge/status-in%20progress-yellow)
+![Tool](https://img.shields.io/badge/Microsoft%20Sentinel-SIEM-blue)
+![Tool](https://img.shields.io/badge/Defender%20XDR-Endpoint%20Telemetry-informational)
+![Query](https://img.shields.io/badge/KQL-Kusto%20Query%20Language-0078D4)
 
 **Tools:** Microsoft Sentinel · Defender XDR · KQL
 **Author:** Danielle Respes · [LinkedIn](https://www.linkedin.com/in/danielle-respes-64113767/)
+
+## About this case
+On 4 July 2026, GF-WS01 at Greenfield Logistics triggered alerts, the MSSP escalated, and a P1 incident was declared. I worked it as a full DFIR investigation across three hosts — GF-WS01, GF-SRV01, GF-DC01 — reconstructing initial access, lateral movement, and impact, every claim cited to telemetry.
+
+This is a live-incident case, not a flag hunt. Each phase documents the question, the query, the finding, and the reasoning.
+
 
 ---
 
@@ -16,24 +24,6 @@
 | **Initial Access Vector** | Compromised Azure Service Principal (`5deb2a08...`) via Run Command |
 | **Impact & Breadth** | `SYSTEM`-level code execution on `GF-WS01` & backdoor persistence established |
 | **Scope & Telemetry** | 3 endpoints (`GF-WS01`, `GF-SRV01`, `GF-DC01`) · Microsoft Sentinel & Defender XDR |
-
----
-
-
-## About this case
-
-On 4 July 2026, GF-WS01 at Greenfield Logistics triggered alerts, the MSSP escalated, and a P1 incident was declared. I was brought in to work it as a full DFIR investigation across three in-scope hosts: GF-WS01, GF-SRV01, and GF-DC01. The task: reconstruct how the attacker got in, how far they moved laterally, and what was taken, every action cited to telemetry, followed by remediation recommendations.
-
-This is a live-incident DFIR case, not a flag hunt. I work it in phases and document each one: the question, the query, what I found, and how I reasoned through it.
-
-**Status:** In progress · started 20 July 2026
-
----
-
-## Technical Stack
-- **SIEM:** Microsoft Sentinel
-- **Endpoint telemetry:** Microsoft Defender XDR
-- **Query language:** KQL (Kusto Query Language)
 
 
 ---
@@ -61,6 +51,15 @@ graph LR
 ```
 
 ---
+
+## Technical Stack
+- **SIEM:** Microsoft Sentinel
+- **Endpoint telemetry:** Microsoft Defender XDR
+- **Query language:** KQL (Kusto Query Language)
+
+
+---
+
 
 
 ## Investigation
