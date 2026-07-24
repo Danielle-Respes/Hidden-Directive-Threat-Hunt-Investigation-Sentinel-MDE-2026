@@ -166,7 +166,7 @@ WindowsProcess_CL
 ### Execution Flow
 
 ```mermaid
-graph TD
+graph LR
     A["loader.ps1<br/>Executes"] --> B["Step 1<br/>AMSI Bypass"]
     B --> C["Step 2<br/>Download Shellcode"]
     C --> D["Step 3<br/>XOR Decrypt"]
@@ -184,6 +184,8 @@ graph TD
     class C,D,E,F stage
     class G exec
 ```
+
+**Legend:** 🟦 Entry point &nbsp;·&nbsp; 🟥 Defense evasion &nbsp;·&nbsp; 🟨 Payload staging &nbsp;·&nbsp; 🟩 Execution
 
 
   
