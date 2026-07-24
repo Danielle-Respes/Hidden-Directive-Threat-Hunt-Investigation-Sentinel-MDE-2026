@@ -1,4 +1,8 @@
-# Hidden Directive — DFIR Investigation (GF-INC-2026-0704)
+<img width="1017" height="362" alt="Screenshot 2026-07-10 at 7 14 45 PM" src="https://github.com/user-attachments/assets/6e1266d4-43ed-4ea8-aecb-d6aaeca1de69" />
+
+
+# Hidden Directive — DFIR Investigation 
+
 
 ![Status](https://img.shields.io/badge/status-in%20progress-yellow)
 ![Tool](https://img.shields.io/badge/Microsoft%20Sentinel-SIEM-blue)
