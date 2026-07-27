@@ -31,16 +31,10 @@ This is a live-incident case, not a flag hunt. Each phase documents the question
 
 ---
 
-## Findings Summary
+## Full breakdown of each phase below:
 
-| Phase | Focus | Key Finding |
-|---|---|---|
-| C01 | Access & Environment | Scoped telemetry across 3 hosts, confirmed workspace access |
-| C02 | Initial Access | Compromised Azure Service Principal → SYSTEM execution via Run Command |
-| C03 | Payload Analysis | In-memory shellcode loader with AMSI bypass and XOR-encoded C2 |
-| C04 | Persistence | Local admin account + SYSTEM scheduled task (survives password reset) |
-| C05 | Privilege Escalation | Token manipulation via signed process → SYSTEM cmd.exe |
-| C06 | Defense Evasion | Hijacked signed Defender process disabled WHQL enforcement |
+<img width="1536" height="1024" alt="ChatGPT Image Jul 27, 2026, 12_58_16 PM" src="https://github.com/user-attachments/assets/2820f30c-8505-454a-850f-901d0c89767a" />
+
 
 ---
 
