@@ -487,7 +487,17 @@ Sancadmin modifies a file token, allowing a legitimate SYSTEM process (CollectGu
 
 ---
 
-## C06 — Defense Evasion: Defender Tampering via Process Hijacking
+## C06 — Defense Evasion: Process Hijacking
+
+Tampering with system security controls by executing inside trusted Microsoft binaries.
+
+| | |
+|---|---|
+| **Attack Method** | Injected code into legitimate `aggregatorhost.exe` process to modify driver signing registry keys |
+| **Impact** | Disabled WHQL driver enforcement while blending into normal Microsoft system telemetry to bypass EDR detections |
+
+---
+
 
 ### Finding: aggregatorhost.exe (Hijacked) Disables Defender WhqlOnlyEvaluation
 
@@ -513,12 +523,20 @@ Sancadmin modifies a file token, allowing a legitimate SYSTEM process (CollectGu
 
 
 
-## C07 — Credential Access
+## C07 — Credential Access: Multi-Vector Credential Harvesting
 
 <img width="1536" height="1024" alt="Cartoon of summary of story" src="https://github.com/user-attachments/assets/dae2e56a-25d0-4104-84ae-e3c4f6e3592a" />
 The short version, before the technical breakdown: the attacker found a password safe, opened it, and walked out with the keys to the whole network.
 
-Multiple credential access techniques used simultaneously — each with its own evidence trail in telemetry.
+Extracting domain credentials from active memory, credential stores, and directory notes.
+
+---
+
+| | |
+|---|---|
+| **Attack Method** | LSASS memory dump, `cmdkey.exe` vault enumeration, KeePass database extraction, and `Get-ADUser` description scraping |
+| **Impact** | Harvested Domain Admin credentials to enable lateral movement across the internal network |
+
 
 ---
 
