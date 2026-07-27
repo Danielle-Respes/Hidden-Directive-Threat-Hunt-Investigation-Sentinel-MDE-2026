@@ -526,9 +526,7 @@ Tampering with system security controls by executing inside trusted Microsoft bi
 ## C07 — Credential Access: Multi-Vector Credential Harvesting
 
 <img width="1536" height="1024" alt="Cartoon of summary of story" src="https://github.com/user-attachments/assets/dae2e56a-25d0-4104-84ae-e3c4f6e3592a" />
-The short version, before the technical breakdown: the attacker found a password safe, opened it, and walked out with the keys to the whole network.
-
-Extracting domain credentials from active memory, credential stores, and directory notes.
+The short version: the attacker found a password safe, opened it, and walked out with the keys to the whole network.
 
 ---
 
@@ -537,32 +535,24 @@ Extracting domain credentials from active memory, credential stores, and directo
 | **Attack Method** | LSASS memory dump, `cmdkey.exe` vault enumeration, KeePass database extraction, and `Get-ADUser` description scraping |
 | **Impact** | Harvested Domain Admin credentials to enable lateral movement across the internal network |
 
-
----
-
-
 ```mermaid
 graph LR
     subgraph Escalation["Privilege Escalation"]
         A["SYSTEM Access<br/>Achieved"]
     end
-
     subgraph Harvest["Credential Harvesting"]
         B["LSASS Memory Dump<br/>T1003.001"]
         F["Credential Manager<br/>cmdkey.exe · T1555"]
         G["KeePass Database<br/>Dumped · T1555.003"]
         H["AD Description Field<br/>via Get-ADUser · T1087.002"]
     end
-
     subgraph Exploit["Exploitation"]
         C["Domain Admin<br/>Credentials Harvested"]
     end
-
     subgraph Impact["Impact"]
         D["Domain Admin<br/>Access Gained"]
         E["Lateral Movement<br/>→ DC01"]
     end
-
     A --> B
     A --> F
     A --> G
@@ -573,99 +563,14 @@ graph LR
     H --> C
     C --> D
     D --> E
-
     classDef escalation fill:#fef3c7,stroke:#d97706,stroke-width:2px,color:#78350f
     classDef harvest fill:#fee2e2,stroke:#dc2626,stroke-width:2px,color:#7f1d1d
     classDef impact fill:#f3e8ff,stroke:#9333ea,stroke-width:2px,color:#581c87
-
     class A escalation
     class B,F,G,H harvest
     class C,D,E impact
 ```
-
-
----
-
-### Key Finding: Multiple Techniques, Different Evidence Trails
-
-Credentials were harvested using **four separate methods**, each visible in different parts of the telemetry. Each method leaves a different fingerprint:
-
-- **LSASS Memory Dump** → Process Access events
-- **Credential Manager** → Process Creation events (cmdkey.exe)
-- **KeePass Database** → Process events (explorer.exe)
-- **AD Description Field** → PowerShell commands + Get-ADUser
-
----
-
-### Finding 1: LSASS Memory Dump
-
-**Timestamp:** Jul 4, 2026 8:26:32 AM | **Tool:** explorer.exe | **Action:** Debug Privileges + Memory Read | **Technique:** T1003.001
-
-<details>
-<summary><b>→ LSASS Memory Accessed</b></summary>
-
-explorer.exe added debug privileges and read lsass.exe memory  
-Process Chain: winlogon.exe → userinit.exe → explorer.exe → lsass.exe  
-Domain credentials harvested from memory
-
-</details>
-
----
-
-### Finding 2: Credential Manager (cmdkey.exe)
-
-**Timestamp:** Jul 4, 2026 7:57:54 AM | **User:** gf-ws01\sancadmin | **Technique:** T1555 (Credentials in Browser/System)
-
-<details>
-<summary><b>→ Stored Credentials Extracted</b></summary>
-
-cmdkey.exe (Credential Manager CLI) executed by cmd.exe  
-Extracted domain admin stored credentials  
-Repeated access at 7:25:03 AM — multiple credential dumps
-
-</details>
-
----
-
-### Finding 3: KeePass Password Manager
-
-**Timestamp:** Jul 4, 2026 6:04:50 AM | **User:** gf-ws01\sancadmin | **Technique:** T1555.003 (Credentials in Software)
-
-<details>
-<summary><b>→ KeePass Database Accessed</b></summary>
-
-explorer.exe leveraged KeePass.exe (known credentials recovery tool)  
-Local password database dumped  
-Domain admin master password recovered
-
-</details>
-
----
-
-### Finding 4: AD Credential Harvesting (Get-ADUser)
-
-**Timestamp:** Jul 4, 2026 7:41:50 AM | **User:** gf-ws01\sancadmin | **Technique:** T1087.002 (Domain Account Discovery)
-
-<details>
-<summary><b>→ Active Directory Enumeration</b></summary>
-
-PowerShell Get-ADUser command executed  
-Queried AD for domain admin accounts and descriptions  
-AD Description fields often contain backup credentials or notes with plaintext passwords
-
-</details>
-
----
-
-### Impact
-
-✅ LSASS dump → Domain credentials in memory  
-✅ Credential Manager → Stored domain admin credentials  
-✅ KeePass → Master password + all stored passwords  
-✅ AD Query → Account enumeration with description field harvesting  
-
-**Result:** Domain admin credentials in hand → sets up lateral movement to DC01
-
+ 
 
 ---
 ## C08 — Discovery
