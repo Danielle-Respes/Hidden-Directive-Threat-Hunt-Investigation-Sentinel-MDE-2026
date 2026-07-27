@@ -633,6 +633,32 @@ Two independent routes converged on `GF-SRV01`, then pivoted through `GF-DC01`, 
 </details>
 
 ---
+## C10 — Command and Control
+
+C2 infrastructure disguised as a legitimate CDN, using HTTPS and clean domain reputation to evade detection.
+
+| | |
+|---|---|
+| **Attack Method** | Hardcoded C2 domain `cdn.cloud-endpoint.net` in `loader.ps1`; HTTPS-encrypted shellcode delivery; domain and its related subdomains carry zero VirusTotal detections |
+| **Impact** | Reputation-based blocking would not have caught this — checking only the observed subdomain misses that the whole parent domain and its sibling subdomains are equally clean |
+
+<details>
+<summary><b>→ Full Evidence</b></summary>
+
+**C2 Domain:** `cdn.cloud-endpoint.net` — discovered hardcoded in `loader.ps1` (C03 payload analysis), not observed directly in network logs (Defender network-event search for "cloud-endpoint" returned no data — traffic was HTTPS and blended with normal CDN egress)
+
+**Protocol:** HTTPS (port 443) — shellcode delivered XOR-encrypted, decrypted with key 0x4A (from C03), executed in memory with no file artifacts
+
+**VirusTotal — parent + related subdomains (not just the observed one):**
+- `cloud-endpoint.net` (parent) — 0/91 vendors flagged, domain ~6 months old
+- `cdn.cloud-endpoint.net` (primary C2) — 0/91, no vendor flags
+- `api.cloud-endpoint.net` (related) — not in VirusTotal database
+- `update.cloud-endpoint.net` (related) — not in VirusTotal database
+
+**Why reputation-based detection failed:** Checking only the observed subdomain would show a clean domain; checking the parent and sibling subdomains shows the same — zero detections across the entire attacker-owned infrastructure, not just one subdomain. Combined with HTTPS encryption (no inline content inspection without SSL interception) and a domain name that mimics legitimate CDN naming conventions, this traffic was invisible to both reputation and network-based detection.
+
+</details>
+
 
 ---
 
