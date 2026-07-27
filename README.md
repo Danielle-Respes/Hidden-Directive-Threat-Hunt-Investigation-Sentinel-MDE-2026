@@ -108,13 +108,7 @@ union withsource=SourceTable *
 
 Exploiting a compromised cloud identity to execute remote commands on an internal virtual machine.
 
-| | |
-|---|---|
-| **Attack method** | Azure VM `Run Command` via compromised Service Principal (Contributor role) |
-| **Impact** | Executed `script49.ps1` natively as `NT AUTHORITY\SYSTEM` — no local password needed |
-
 ---
-
 
 ### Timeline
 
@@ -127,6 +121,18 @@ AzureActivity
 | where CallerIpAddress == "4.153.100.221"
 ```
 
+---
+
+### How to Explain This Phase Simply
+
+| | |
+|---|---|
+| **What happened** | The attacker compromised an Azure Service Principal (an automated cloud identity) with Contributor permissions |
+| **The vector** | Used Azure's native `Run Command` feature to remotely execute a malicious script (`script49.ps1`) directly on an internal VM |
+| **The result** | `Run Command` runs natively through the Azure VM Agent, so the script executed immediately with full `NT AUTHORITY\SYSTEM` privileges — no local password needed |
+| **Why it's dangerous** | Bridges cloud control-plane compromise straight into local host takeover |
+
+---
 **Result:** Service Principal with Contributor role initiates VM Run Command from IP 4.153.100.221.
 
 ---
