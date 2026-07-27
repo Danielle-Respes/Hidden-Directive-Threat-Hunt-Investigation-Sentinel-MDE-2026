@@ -706,6 +706,31 @@ graph LR
     C --> E[Survives Password Reset]
     D --> E
 ```
+
+## Conclusion — What Actually Happened
+
+An attacker got into one laptop, and within about six hours had complete control of the entire company network — every computer, every password, every file.
+
+**The story in plain terms:**
+
+| Stage | What it means |
+|---|---|
+| **Got in** | Attacker tricked one employee's laptop into running malicious code |
+| **Took over** | Stole login credentials and elevated a low-level account to full "administrator" |
+| **Spread** | Moved from that one laptop to the servers and finally the domain controller — the system that manages every account in the company |
+| **Hid** | Disguised traffic as normal web browsing and buried changes inside trusted, legitimate software so security tools wouldn't notice |
+| **Took data** | Copied a password vault and a full archive of company-wide data off the network |
+| **Left doors open** | Planted two hidden backdoors that still work even after passwords are reset |
+
+```mermaid
+graph LR
+    A[One Laptop Infected] --> B[Admin Access Stolen]
+    B --> C[Spread to Servers]
+    C --> D[Full Company Network Compromised]
+    D --> E[Data Stolen]
+    D --> F[Hidden Backdoors Planted]
+```
+
 ---
 
 **[Portfolio](https://github.com/Danielle-Respes)** • **[LinkedIn](https://www.linkedin.com/in/danielle-respes-64113767/)**
