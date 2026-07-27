@@ -189,7 +189,6 @@ WindowsProcess_CL
 > [!NOTE]
 > **Operational Security:** Evidence contained live malware. I created an isolated VM in the Log(N)Pacific cyber range, RDP'd from my Mac, extracted & analyzed in sandbox, then deleted the VM. No malware on personal systems.
 
---
 
 In-memory execution of XOR-encoded malware via reflective injection.
 
@@ -377,11 +376,17 @@ $t = [W.K]::CreateThread([IntPtr]::Zero,0,$mem,[IntPtr]::Zero,0,[IntPtr]::Zero)
 
 These are for C04 (Impact Analysis).
 
-
 ---
-## C04 — Persistence Mechanisms
 
-Two persistence mechanisms deployed across the estate. One deleted via standard remediation. One survives password reset.
+## C04 — Persistence Mechanisms: Backdoor Accounts & Scheduled Tasks
+
+Establishing long-term access across endpoints using local admin creation and SYSTEM tasks.
+
+| | |
+|---|---|
+| **Attack Method** | Created local admin `sancadmin` on `GF-WS01` and a hidden scheduled task (`WindowsUpdate`) on `GF-SRV01` |
+| **Impact** | Maintains persistent access to host endpoints that survives standard user domain password resets |
+
 
 ---
 
