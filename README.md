@@ -448,76 +448,54 @@ Located via Defender XDR → Device Timeline → Process Events + Scheduled Task
 
 ## C05 — Privilege Escalation
 
-Privilege escalation from `sancadmin` (local admin user) to `SYSTEM` privileges using Access Token Manipulation and DLL side-loading.
-
----
-### How to Explain This Phase Simply
+`sancadmin` stole a SYSTEM process's access token and assigned it to another process, spawning `cmd.exe` running as `NT AUTHORITY\SYSTEM`.
 
 | | |
 |---|---|
-| **What happened** | `sancadmin` stole an elevated security token from `StoreDesktopExtension.exe` and assigned it to `CollectGuestLogs.exe` |
-| **Privilege abused** | `SeImpersonatePrivilege` / `SeAssignPrimaryTokenPrivilege` — lets a process duplicate and run under another process's security context |
-| **The result** | `CollectGuestLogs.exe` inherited the stolen token and spawned `cmd.exe` running as full `NT AUTHORITY\SYSTEM` |
-| **Why it's stealthy** | No new services, no registry run keys — bypasses the persistence detections most tools look for |
-
----
-
-### Finding: StoreDesktopExtension.exe Token Modification → SYSTEM cmd.exe Execution
-
-**Initial Access:** Jul 4, 2026 9:55:00.341 PM | **User:** gf-ws01\sancadmin | **Action:** Token Modified
-
-**Escalation to SYSTEM:** Jul 4, 2026 9:55:00.500 PM | **User:** NT AUTHORITY\SYSTEM | **Action:** Process Created
+| **Attack Method** | Modified `StoreDesktopExtension.exe`'s access token (`SeImpersonatePrivilege`/`SeAssignPrimaryTokenPrivilege`) and assigned it to `CollectGuestLogs.exe` |
+| **Impact** | `CollectGuestLogs.exe` inherited the stolen token and spawned `cmd.exe` as full SYSTEM — no new services or run keys, bypassing standard persistence detections |
 
 <details>
-<summary><b>→ View Defender Timeline Evidence</b></summary>
+<summary><b>→ Full Evidence</b></summary>
+
+**Initial Access:** Jul 4, 2026 9:55:00.341 PM | **User:** gf-ws01\sancadmin | **Action:** Token Modified
+**Escalation to SYSTEM:** Jul 4, 2026 9:55:00.500 PM | **User:** NT AUTHORITY\SYSTEM | **Action:** Process Created
 
 ![Defender Timeline: Privilege Escalation Chain](evidence/c05-privilege-escalation.png)
 
-**Step 1 (9:55:00.341 PM):** sancadmin modifies StoreDesktopExtension.exe access token  
-**Step 2 (9:55:00.500 PM):** CollectGuestLogs.exe (SYSTEM process) launches cmd.exe as NT AUTHORITY\SYSTEM  
 Process Chain: services.exe → WaAppAgent.exe → CollectGuestLogs.exe → cmd.exe
 
-</details>
-
-Sancadmin modifies a file token, allowing a legitimate SYSTEM process (CollectGuestLogs.exe) to execute arbitrary commands with elevated privileges.
-
-**Why this technique is stealthy:** No service installation or modification events are generated. Standard detection would miss this.
+**Why stealthy:** No service installation or modification events generated — standard detection misses it.
 
 **MITRE ATT&CK:** T1134 (Access Token Manipulation) + T1574 (DLL Side-Loading)
+
+</details>
 
 ---
 
 ## C06 — Defense Evasion: Process Hijacking
 
-Tampering with system security controls by executing inside trusted Microsoft binaries.
+Attacker injected code into a trusted, Microsoft-signed process to quietly disable driver-signing enforcement.
 
 | | |
 |---|---|
 | **Attack Method** | Injected code into legitimate `aggregatorhost.exe` process to modify driver signing registry keys |
 | **Impact** | Disabled WHQL driver enforcement while blending into normal Microsoft system telemetry to bypass EDR detections |
 
----
-
-
-### Finding: aggregatorhost.exe (Hijacked) Disables Defender WhqlOnlyEvaluation
-
-**Timestamp:** Jul 8, 2026 10:00:55 PM | **User:** NT AUTHORITY\SYSTEM | **Action:** Registry Modified
-
-<details>
-<summary><b>→ View Defender Timeline Evidence (3-part chain)</b></summary>
-
 <img width="1075" height="420" alt="c06-defender-tamper" src="https://github.com/user-attachments/assets/ef5c0472-0815-4d24-b0b0-3f26fd9506ae" />
 
+<details>
+<summary><b>→ Full Evidence</b></summary>
+
+**Timestamp:** Jul 8, 2026 10:00:55 PM | **User:** NT AUTHORITY\SYSTEM | **Action:** Registry Modified
 
 **Process Chain:** services.exe → svchost.exe → aggregatorhost.exe → Registry Modification
 
 **Registry Key Modified:** HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Control\CI\WhqlOnlyEvaluation
 
-**Critical Detail:** aggregatorhost.exe is signed by Microsoft Windows (legitimate process), but attacker injected code into it. Defender sees a trusted system process modifying security settings, so it doesn't flag it as suspicious.
+**Critical Detail:** `aggregatorhost.exe` is Microsoft-signed and legitimate, but attacker-injected code runs inside it — Defender sees a trusted system process modifying security settings and doesn't flag it.
 
 </details>
-
-**Why This Matters:** This is sophisticated evasion because it abuses a legitimate, signed Windows process. Detection systems trust Microsoft-signed executables, so the tampering goes unnoticed.
 
 ---
 
