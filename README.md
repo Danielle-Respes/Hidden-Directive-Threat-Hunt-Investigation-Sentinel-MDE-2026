@@ -707,6 +707,60 @@ graph LR
     D --> E
 ```
 
+<details> <summary><b>→ Impact & Remediation Steps</b></summary>
+What the Attacker Obtained:
+
+Full domain administrator access (via svc_backup account + AdminSDHolder modification, C08)
+All three hosts compromised (WS01, SRV01, DC01)
+Domain controller control — can reset any password, create any account, access any file
+Harvested credentials for svc_backup, t.harris, m.smith, sancadmin
+What the Attacker Can Do With This:
+
+Reset domain admin passwords
+Create new admin accounts
+Read/modify/delete any file on any domain-joined computer
+Install ransomware or steal data from the entire network
+Persist indefinitely unless backdoors are removed
+Independent Backdoors (Survive Password Reset):
+
+Backdoor 1 — sancadmin Local Account on GF-WS01
+
+Created Jul 4, 10:01:35 AM (C04)
+Local admin privileges on GF-WS01 only
+Works even if domain password is reset
+Login: sancadmin / ChangeThis2026fix
+Backdoor 2 — WindowsUpdate Scheduled Task on GF-SRV01
+
+Created Jul 4, 9:11:20 AM (C04)
+Runs as NT AUTHORITY\SYSTEM automatically
+Executes C:\Windows\Temp\srv.exe
+Survives password reset — tied to the computer, not a user
+Remediation Steps (In Order):
+
+Remove local admin backdoor (GF-WS01): delete the sancadmin local account
+Remove scheduled-task backdoor (GF-SRV01):
+schtasks /delete /tn WindowsUpdate /f
+del C:\Windows\Temp\srv.exe
+Reset all domain passwords: svc_backup, t.harris, m.smith, all domain admins
+Audit and remove unauthorized accounts: check for other sancadmin accounts on other hosts; review all scheduled tasks for suspicious names; review local admin group membership
+Monitor: watch for reactivation of the WindowsUpdate task, sancadmin login attempts, and new scheduled tasks with suspicious names
+</details>
+
+```mermaid
+graph LR
+    A[One Laptop Infected] --> B[Admin Access Stolen]
+    B --> C[Spread to Servers]
+    C --> D[Full Company Network Compromised]
+    D --> E[Data Stolen]
+    D --> F[Hidden Backdoors Planted]
+
+```
+Bottom line: A single compromised laptop escalated to full control of the company's entire digital environment — this is the worst-case outcome in cybersecurity, sometimes called "total domain compromise." Fixing it isn't just resetting passwords; the hidden backdoors have to be found and removed manually, or the attacker walks right back in.
+
+
+
+
+
 ## Conclusion — What Actually Happened
 
 An attacker got into one laptop, and within about six hours had complete control of the entire company network — every computer, every password, every file.
@@ -722,14 +776,6 @@ An attacker got into one laptop, and within about six hours had complete control
 | **Took data** | Copied a password vault and a full archive of company-wide data off the network |
 | **Left doors open** | Planted two hidden backdoors that still work even after passwords are reset |
 
-```mermaid
-graph LR
-    A[One Laptop Infected] --> B[Admin Access Stolen]
-    B --> C[Spread to Servers]
-    C --> D[Full Company Network Compromised]
-    D --> E[Data Stolen]
-    D --> F[Hidden Backdoors Planted]
-```
 
 ---
 
