@@ -687,9 +687,25 @@ An early staging attempt on `GF-WS01` failed for lack of privilege; a second att
 **Telemetry sources:** both staging events are visible above as process telemetry (process creation). ⚠️ Still need the matching **file event telemetry** (file creation/write events for `keepass.zip` and `exfil.zip`) to satisfy the hint's "both sources" requirement — add those rows/screenshots here once pulled.
 
 </details>
+---
 
+## C12 — Impact Assessment & Remediation
 
+Full domain compromise achieved, with two independent backdoors that survive standard password-reset remediation.
 
+| | |
+|---|---|
+| **Impact** | Domain controller compromised; all domain user accounts harvested; full administrative access across all three hosts; persistence mechanisms independent of domain credentials |
+| **Remediation** | Delete `sancadmin` local account (GF-WS01); remove `WindowsUpdate` scheduled task (GF-SRV01); reset all domain passwords; audit and remove unauthorized accounts |
+
+```mermaid
+graph LR
+    A[Full Domain Compromise] --> B[Attacker Can - Reset Passwords, Create Accounts, Access All Files, Install Malware]
+    A --> C[Backdoor 1 - sancadmin on GF-WS01]
+    A --> D[Backdoor 2 - WindowsUpdate Task on GF-SRV01]
+    C --> E[Survives Password Reset]
+    D --> E
+```
 ---
 
 **[Portfolio](https://github.com/Danielle-Respes)** • **[LinkedIn](https://www.linkedin.com/in/danielle-respes-64113767/)**
