@@ -659,6 +659,36 @@ C2 infrastructure disguised as a legitimate CDN, using HTTPS and clean domain re
 
 </details>
 
+---
+## C11 — Collection and Exfiltration
+
+An early staging attempt on `GF-WS01` failed for lack of privilege; a second attempt succeeded on `GF-DC01` after domain admin access was achieved, archiving domain-wide data.
+
+| | |
+|---|---|
+| **Attack Method** | Failed: `sancadmin` staged `keepass.zip` on GF-WS01 before achieving privileged access. Succeeded: `NT AUTHORITY\SYSTEM` staged `exfil.zip` on GF-DC01 after lateral movement, with full domain admin equivalent access |
+| **Impact** | Attacker collected the full KeePass password vault contents (attempted) and a complete domain data archive from the DC (achieved) — the second attempt had read access to all AD objects and domain secrets |
+
+<details>
+<summary><b>→ Full Evidence</b></summary>
+
+**Failed Attempt — GF-WS01:**
+- 7/4/2026, 10:03:09 AM — `sancadmin` created `C:\Users\sancadmin\Downloads\keepass.zip`
+- User: `sancadmin` (limited privileges at this point)
+- Data: KeePass password vault (from C07)
+- Why it failed: staged too early, before domain admin access was achieved — likely lacked permissions to complete exfiltration
+
+**Successful Attempt — GF-DC01:**
+- 7/4/2026, 3:06:56 PM — `NT AUTHORITY\SYSTEM` created `C:\Windows\Temp\exfil.zip`
+- User: `NT AUTHORITY\SYSTEM` (full privileges)
+- Data: full domain data collection from the DC
+- Why it succeeded: ran after lateral movement completed, with domain admin equivalent access and ability to read all AD objects and domain secrets
+
+**Telemetry sources:** both staging events are visible above as process telemetry (process creation). ⚠️ Still need the matching **file event telemetry** (file creation/write events for `keepass.zip` and `exfil.zip`) to satisfy the hint's "both sources" requirement — add those rows/screenshots here once pulled.
+
+</details>
+
+
 
 ---
 
