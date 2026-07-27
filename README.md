@@ -725,7 +725,26 @@ Then: reset passwords for `svc_backup`, `t.harris`, `m.smith`, all domain admins
 
 </details>
 
+---
 
+## Conclusion — What Actually Happened
+
+One infected laptop led to complete control of the company network in about six hours.
+
+```mermaid
+graph LR
+    A[One Laptop Infected] --> B[Admin Access Stolen]
+    B --> C[Spread to Servers + Domain Controller]
+    C --> D[Data Stolen]
+    C --> E[Hidden Backdoors Planted]
+```
+
+**Bottom line**: A single compromised laptop escalated to full control of the company's digital environment — a total domain compromise. Fixing it takes more than a password reset; the backdoors must be found and removed manually.
+
+
+
+
+---
 
 **[Portfolio](https://github.com/Danielle-Respes)** • **[LinkedIn](https://www.linkedin.com/in/danielle-respes-64113767/)**
 
