@@ -423,7 +423,15 @@ Located via Defender XDR → Device Timeline → Process Events + Scheduled Task
 
 ## C05 — Privilege Escalation
 
-Privilege escalation from sancadmin (user) to SYSTEM via token modification and DLL side-loading.
+Privilege escalation from `sancadmin` (local admin user) to `SYSTEM` privileges using Access Token Manipulation and DLL side-loading.
+
+---
+### How to Explain This Phase Simply
+
+* **What Happened:** The user account `sancadmin` stole an elevated security token from `StoreDesktopExtension.exe` and assigned it to `CollectGuestLogs.exe`.
+* **The Privilege Abused:** Windows `SeImpersonatePrivilege` / `SeAssignPrimaryTokenPrivilege`, which allows a process to duplicate and run under another process's security context.
+* **The Result:** When `CollectGuestLogs.exe` ran, it inherited that stolen token and spawned a `cmd.exe` shell running as full `NT AUTHORITY\SYSTEM`.
+* **Why It's Stealthy:** The attacker didn't create new services or modify registry run keys, bypassing traditional persistence detections.
 
 ---
 
