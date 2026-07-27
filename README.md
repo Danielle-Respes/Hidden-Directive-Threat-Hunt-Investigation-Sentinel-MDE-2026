@@ -665,6 +665,142 @@ AD Description fields often contain backup credentials or notes with plaintext p
 ✅ AD Query → Account enumeration with description field harvesting  
 
 **Result:** Domain admin credentials in hand → sets up lateral movement to DC01
+
+
+---
+## C08 — Discovery
+
+Reconnaissance and enumeration activity to map the network, identify admin accounts, and discover systems for lateral movement. Discovery happened across all three hosts with different techniques on each.
+
+| | |
+|---|---|
+| **Attack Method** | dsregcmd.exe automated discovery within seconds of initial access; Get-ADUser/Get-ADComputer/Get-ADGroup enumeration; systeminfo and whoami for system discovery; SQL Server enumeration via SQLCMD |
+| **Impact** | Complete domain architecture mapped; Admin accounts identified (svc_backup service account); All three hosts discovered and enumerated for lateral movement |
+
+---
+### C08 Diagram
+
+```mermaid
+graph LR
+    subgraph WS01["GF-WS01"]
+        A["dsregcmd.exe<br/>Automated Discovery"] --> B["svc_backup<br/>Enumerated"]
+    end
+
+    subgraph SRV01["GF-SRV01"]
+        C["System/User Discovery"] --> D["SQL Server<br/>xp_cmdshell Found"]
+    end
+
+    subgraph DC01["GF-DC01"]
+        E["Full AD Enumeration"] --> F["AdminSDHolder<br/>ACL Modified"]
+    end
+
+    B --> G["Full Domain<br/>Enumerated"]
+    D --> G
+    F --> G
+
+    classDef host fill:#fef3c7,stroke:#d97706,stroke-width:2px,color:#78350f
+    classDef impact fill:#f3e8ff,stroke:#9333ea,stroke-width:2px,color:#581c87
+
+    class A,B,C,D,E,F host
+    class G impact
+```
+
+---
+
+### Discovery Progression Timeline
+
+**GF-WS01 (Initial Compromise - 10:03 AM onwards):**
+
+<details>
+<summary><b>→ GF-WS01 Discovery Commands</b></summary>
+
+- **10:03:52 AM** — dsregcmd.exe (AUTOMATED - within seconds of C02 initial access)
+- **11:24:02 AM** — whoami (user identity confirmation - sancadmin)
+- **11:32:41 AM** — Get-ADUser svc_backup -Properties Description,ServicePrincipalNames (targeted service account enumeration, extracted credentials from Description field)
+- **1:10:24 PM** — systeminfo (system configuration discovery)
+
+**Key Finding:** Attacker immediately enumerated the svc_backup service account, extracted embedded credentials from AD Description field
+
+</details>
+
+---
+
+**GF-SRV01 (First Lateral Movement Pivot - 10:25 AM onwards):**
+
+<details>
+<summary><b>→ GF-SRV01 Discovery Commands</b></summary>
+
+- **10:25:04 AM** — dsregcmd.exe (early pivot discovery)
+- **12:45:28 PM** — systeminfo (system configuration)
+- **12:54:38 PM** — whoami (user context: t.harris - domain user account)
+- **12:54:46 PM** — whoami /priv (privilege level enumeration)
+- **12:57:59 PM** — SQLCMD with xp_cmdshell enabled (SQL Server discovery and code execution prep)
+- **1:01:58 PM** — powershell whoami (t.harris context confirmation)
+- **1:01:59 PM** — whoami (d.williams - another compromised domain account discovered)
+
+**Key Finding:** Attacker discovered multiple compromised domain accounts (t.harris, d.williams) and SQL Server with xp_cmdshell capability
+
+</details>
+
+---
+
+**GF-DC01 (Domain Controller - 10:11 AM onwards):**
+
+<details>
+<summary><b>→ GF-DC01 Discovery Commands</b></summary>
+
+- **10:11:43 AM** — dsregcmd.exe (DC discovered VERY early, within 10 min of initial access)
+- **11:42:11 AM** — Full AD enumeration via PowerShell:
+
+```powershell
+Get-ADUser -Filter {Enabled -eq $true} -Properties LastLogonDate
+Get-ADComputer -Filter *
+Get-ADGroup -Filter *
+repadmin /replsummary
+Get-DnsServerZone
+```
+
+- **3:44:59 PM** — AdminSDHolder ACL modification (privilege escalation preparation):
+
+```powershell
+Import-Module ActiveDirectory
+$acl = Get-Acl 'AD:CN=AdminSDHolder,CN=System,DC=greenfield,DC=local'
+$sid = (Get-ADUser svc_backup).SID
+$rule = New-Object System.DirectoryServices.ActiveDirectoryAccessRule($sid,'GenericAll','Allow')
+$acl.AddAccessRule($rule)
+Set-Acl -AclObject $acl 'AD:CN=AdminSDHolder,CN=System,DC=greenfield,DC=local'
+```
+
+**Key Finding:** Complete domain enumeration + preparation for privilege escalation via AdminSDHolder modification
+
+</details>
+
+---
+
+### Investigation Methodology
+
+**Initial approach:** Searched Defender XDR for ScriptBlock logs → **0 results**
+
+**Pivot:** Used KQL query in LAW-SilentCorridor WindowsProcess_CL to retrieve actual PowerShell command execution text (ScriptBlock equivalent)
+
+**Result:** Located discovery commands across all three hosts with exact timestamps and command text from KQL telemetry
+
+---
+
+### Summary
+
+Multiple discovery techniques used across the estate:
+- **Automated system discovery** (dsregcmd) fired within seconds
+- **AD enumeration** targeting specific service accounts
+- **System information gathering** (systeminfo, whoami)
+- **SQL Server discovery** (SQLCMD with xp_cmdshell)
+- **Domain replication analysis** (repadmin)
+- **Privilege escalation preparation** (AdminSDHolder ACL modification)
+
+All three hosts enumerated from initial access → full domain administrator equivalent access achieved
+
+
+
 ---
 
 **[Portfolio](https://github.com/Danielle-Respes)** • **[LinkedIn](https://www.linkedin.com/in/danielle-respes-64113767/)**
