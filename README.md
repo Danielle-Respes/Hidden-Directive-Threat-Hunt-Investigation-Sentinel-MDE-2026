@@ -106,9 +106,15 @@ union withsource=SourceTable *
 
 ## C02 — Initial Access: Compromised Azure Service Principal
 
-**Attack Method:** Azure Run Command via compromised Service Principal with Contributor role
+Exploiting a compromised cloud identity to execute remote commands on an internal virtual machine.
+
+| | |
+|---|---|
+| **Attack method** | Azure VM `Run Command` via compromised Service Principal (Contributor role) |
+| **Impact** | Executed `script49.ps1` natively as `NT AUTHORITY\SYSTEM` — no local password needed |
 
 ---
+
 
 ### Timeline
 
