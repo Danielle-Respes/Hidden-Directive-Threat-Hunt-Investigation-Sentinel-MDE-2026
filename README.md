@@ -180,7 +180,7 @@ WindowsProcess_CL
 **Evidence Sources:** LAW-Cyber-Range (Azure management logs) + LAW-SilentCorridor (Windows process telemetry)
 
 ---
-## C03 — Payload Execution Analysis
+## C03 — Payload Analysis: Fileless PowerShell Loader
 
 ![Difficulty](https://img.shields.io/badge/Difficulty-Medium-yellow)
 ![Analysis](https://img.shields.io/badge/Analysis-Malware%20Reverse%20Engineering-red)
@@ -188,6 +188,16 @@ WindowsProcess_CL
 
 > [!NOTE]
 > **Operational Security:** Evidence contained live malware. I created an isolated VM in the Log(N)Pacific cyber range, RDP'd from my Mac, extracted & analyzed in sandbox, then deleted the VM. No malware on personal systems.
+
+--
+
+In-memory execution of XOR-encoded malware via reflective injection.
+
+| | |
+|---|---|
+| **Attack Method** | Obfuscated PowerShell loader (`script49.ps1`) executing directly in RAM |
+| **Impact** | Bypassed AMSI, downloaded encrypted C2 payload, allocated RWX memory, and executed shellcode via `CreateThread` |
+
 
 ---
 
@@ -217,8 +227,6 @@ graph LR
 
 
   
-
-
 ---
 
 ### What I Found
