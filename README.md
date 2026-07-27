@@ -603,6 +603,38 @@ Set-Acl -AclObject $acl 'AD:CN=AdminSDHolder,CN=System,DC=greenfield,DC=local'
 </details>
 
 ---
+## C09 — Lateral Movement
+
+Two independent routes converged on `GF-SRV01`, then pivoted through `GF-DC01`, which served as the persistent internal authentication hub for the rest of the operation.
+
+| | |
+|---|---|
+| **Attack Method** | Route 1: `GF-SRV01$` computer account (Pass-the-Hash) from 10.1.0.169. Route 2: `t.harris` domain user from 10.1.0.120. Both later authenticated to `GF-DC01` via Kerberos (TGT/TGS) and Overpass-the-Hash |
+| **Impact** | Attacker gained a foothold on `GF-SRV01` from two separate paths, then used `GF-DC01` as the pivot for all subsequent authentication — including additional compromised accounts `m.smith` and backdoor `sancadmin` |
+
+<details>
+<summary><b>→ Full Evidence</b></summary>
+
+**Route 1 — Machine-to-machine (Pass-the-Hash):** 10:01:48 AM | `GF-SRV01$` computer account from 10.1.0.169
+
+**Route 2 — Human account:** 11:10:00 AM | `t.harris` domain user from 10.1.0.120
+
+**Movement to GF-DC01:**
+- Row 927–928 (11:10:04 AM): EventID 4768 (TGT request) + 4769 (TGS request) from 10.1.0.169 — Overpass-the-Hash
+- Row 931: `t.harris` successful logon to GF-DC01 (EventID 4624)
+- Row 1001: EventID 4771 (failed pre-authentication) from 10.1.0.169 — suspicious, worth flagging separately from the successful TGT/TGS pair above
+
+**Additional compromised accounts:**
+- Row 959: `m.smith` logs into GF-SRV01 from 10.1.0.133
+- Row 973: `sancadmin` (backdoor account) accesses GF-DC01
+
+**GF-DC01 as persistent pivot:** Every Kerberos event (4768, 4769) flows through GF-DC01 — TGT/TGS requests from both GF-SRV01 (10.1.0.169) and GF-WS01 (10.1.0.133) are logged there, making it the authentication center for all lateral movement in this incident.
+
+</details>
+
+---
+
+---
 
 **[Portfolio](https://github.com/Danielle-Respes)** • **[LinkedIn](https://www.linkedin.com/in/danielle-respes-64113767/)**
 
