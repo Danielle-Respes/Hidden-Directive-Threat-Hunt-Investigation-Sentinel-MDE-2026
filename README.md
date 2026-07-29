@@ -546,7 +546,7 @@ graph TB
 | **LAW-SilentCorridor** | Partial | Logged process creation (`cmd.exe`), but missed the underlying token modification event |
 | **Defender XDR** | Found | Captured explicit `ProcessPrimaryTokenModification` event at 9:55:00.341 PM |
 
-**Key Finding:** Token manipulation is visible only in Defender XDR — LAW-SilentCorridor's process telemetry has no equivalent event type. Privilege escalation via token theft requires endpoint detection (MDE), not just process logs.
+**Key Finding:** While LAW-SilentCorridor caught the resulting `cmd.exe` process launch, the underlying token manipulation is visible only in Defender XDR — standard process logs lack primary token modification event types.
 
 <details>
 <summary><b>→ Full Evidence</b></summary>
@@ -567,11 +567,6 @@ Process Chain: services.exe → WaAppAgent.exe → CollectGuestLogs.exe → cmd.
 
 **Why stealthy:** No service installation or modification events generated — standard detection misses it. `cmd.exe` was also launched with a named pipe as stdin (`CmdExecutionWithStdInNamedPipe`), consistent with remote command execution tooling rather than interactive use.
 </details>
-
-
-**MITRE ATT&CK:** T1134 (Access Token Manipulation) + T1574 (DLL Side-Loading)
-
-
 
 
 ---
