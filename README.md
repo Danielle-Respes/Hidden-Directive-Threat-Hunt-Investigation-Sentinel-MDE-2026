@@ -118,6 +118,8 @@ AzureActivity
 
 ---
 
+---
+
 ### How to Explain This Phase Simply
 
 | | |
@@ -129,34 +131,12 @@ AzureActivity
 
 ### Cross-SIEM Validation: LAW-SilentCorridor vs Defender XDR
 
-| Source | Timestamp | Key Detail |
-|---|---|---|
-| **LAW-SilentCorridor** | 7/4/2026, 10:01:34.963 AM | Full command line: `"cmd" /Powershell -ExecutionPolicy Unrestricted -File script49.ps1` |
-| **Defender XDR** | 7/4/2026, 10:01:34.997 AM | Process chain: `cmd.exe → powershell.exe → net.exe`, user `NT AUTHORITY\SYSTEM` |
+**Key Finding:** Initial cloud activity (8:01 AM) and host-level execution (10:01 AM) reflect telemetry latency through the Azure VM extension, confirming full path correlation across all three sources.
 
-
-**Why both matter:**
-
-<table>
-<tr>
-<td width="50%" valign="top">
-
-**LAW-SilentCorridor**
-
-Exact command line — proves policy bypass:
-`-ExecutionPolicy Unrestricted`
-
-</td>
-<td width="50%" valign="top">
-
-**Defender XDR**
-
-Visual process chain — confirms SYSTEM privilege:
-`cmd.exe → powershell.exe → net.exe`
-
-</td>
-</tr>
-</table>
+| Source | Timestamp | Technical Detail | In Plain Words |
+|---|---|---|---|
+| **LAW-SilentCorridor** | 10:01:34.963 AM | Full command line: `"cmd" /Powershell -ExecutionPolicy Unrestricted -File script49.ps1` | Proves the attacker turned off PowerShell's safety checks on purpose |
+| **Defender XDR** | 10:01:34.997 AM | Process chain: `cmd.exe → powershell.exe → net.exe`, user `NT AUTHORITY\SYSTEM` | Shows exactly what that command did next, with full system privileges |
 
 Together, both sources confirm the initial access method: Azure Run Command execution with policy bypass, leading to backdoor account creation.
 
@@ -185,8 +165,8 @@ graph TB
     class A,B,C source
     class A1,B1,C1 finding
     class D,E,F,G,H result
-
 ```
+
 ### Why the Times Are Different
 
 Think of this like a text message: you hit send, but it takes a second to arrive and be read. Same idea here, just stretched out.
@@ -198,33 +178,24 @@ Think of this like a text message: you hit send, but it takes a second to arrive
 
 **Why the ~2-hour gap:** the command has to travel from Azure, through the VM's extension, into a queue, before it finally runs on the machine. All three logs are correct — they're just watching different stops on the same trip.
 
-**Why we need all three sources:**
-- **LAW-Cyber-Range** — proves the cloud identity was compromised and shows the attacker's IP
-- **LAW-SilentCorridor** — shows the exact command that ran, including the security bypass
-- **Defender XDR** — shows the visual chain of what that command did next (cmd → powershell → net)
-
-Together, they prove the full path: stolen cloud key → command sent → command runs → attacker gets in.
-
----
+**Together, these three logs prove the full path:** stolen cloud key → command sent → command runs → attacker gets in.
 
 <details>
 <summary><b>→ Raw Query Evidence (KQL)</b></summary>
 
-
 **10:01:34 AM — Payload Execution (LAW-SilentCorridor)**
 
+```kql
 WindowsProcess_CL
 | where DvcHostname == "GF-WS01.greenfield.local"
-| where TargetProcessCommandLine has_any ("net user sancadmin", "net localgroup")
-| where TimeGenerated between (datetime(2026-07-04 10:01:35) .. datetime(2026-07-04 10:01:36))
+| where TargetProcessCommandLine contains "script49.ps1"
+| where ActorUsername == "NT AUTHORITY\SYSTEM"
 | project TimeGenerated, ActorUsername, TargetProcessCommandLine
+```
 
+Result: PowerShell executes script49.ps1 with SYSTEM privileges and unrestricted execution policy.
 
-**Result:** PowerShell executes script49.ps1 with SYSTEM privileges and unrestricted execution policy.
-
----
-
-**10:01:35 AM** — Persistence Established (LAW-SilentCorridor)
+**10:01:35 AM — Persistence Established (LAW-SilentCorridor)**
 
 ```kql
 WindowsProcess_CL
@@ -234,13 +205,10 @@ WindowsProcess_CL
 | project TimeGenerated, ActorUsername, TargetProcessCommandLine
 ```
 
-**Result:**
-
+Result:
 10:01:35.466 AM | NT AUTHORITY\SYSTEM | net.exe user sancadmin ChangeThis2026fix
-
 10:01:35.783 AM | NT AUTHORITY\SYSTEM | net.exe user sancadmin /active:yes
 
----
 </details>
 
 ### MITRE ATT&CK Mapping
@@ -252,6 +220,7 @@ WindowsProcess_CL
 | 10:01:35 AM | Persistence | T1136 (Create Account) | sancadmin local admin account |
 
 **Evidence Sources:** LAW-Cyber-Range (Azure management logs) + LAW-SilentCorridor (Windows process telemetry)
+
 
 ---
 ## C03 — Payload Analysis: Fileless PowerShell Loader
