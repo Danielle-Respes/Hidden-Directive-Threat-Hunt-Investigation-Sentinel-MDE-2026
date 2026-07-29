@@ -127,9 +127,28 @@ AzureActivity
 | **The result** | `Run Command` runs natively through the Azure VM Agent, so the script executed immediately with full `NT AUTHORITY\SYSTEM` privileges — no local password needed |
 | **Why it's dangerous** | Bridges cloud control-plane compromise straight into local host takeover |
 
----
-**Result:** Service Principal with Contributor role initiates VM Run Command from IP 4.153.100.221.
+### Cross-SIEM Validation: LAW-SilentCorridor vs Defender XDR
 
+| Source | Timestamp | Key Detail |
+|---|---|---|
+| **LAW-SilentCorridor** | 7/4/2026, 10:01:34.963 AM | Full command line: `"cmd" /Powershell -ExecutionPolicy Unrestricted -File script49.ps1` |
+| **Defender XDR** | 7/4/2026, 10:01:34.997 AM | Process chain: `cmd.exe → powershell.exe → net.exe`, user `NT AUTHORITY\SYSTEM` |
+
+**Why both matter:** LAW-SilentCorridor's KQL shows the exact command line — including the `-ExecutionPolicy Unrestricted` flag proving the attacker deliberately bypassed PowerShell's execution policy — but doesn't visualize the process chain. Defender XDR's Device Timeline shows the reverse: the full `cmd.exe → powershell.exe → net.exe` chain and confirms SYSTEM-level privilege, but doesn't surface the execution-policy flag. Together they confirm the initial access method: Azure VM Run Command execution with policy bypass, leading to backdoor account creation.
+
+
+```mermaid
+graph TB
+    A["LAW-Cyber-Range<br/>Azure Activity Log<br/>8:01 AM"] -->|"Caller: 5deb2a08...<br/>IP: 4.153.100.221"| D["Same Event:<br/>script49.ps1 Execution<br/>10:01:34 AM"]
+    B["LAW-SilentCorridor<br/>Windows Process Telemetry<br/>10:01:34.963 AM"] -->|"Full command line +<br/>-ExecutionPolicy Unrestricted flag"| D
+    C["Defender XDR<br/>Device Timeline<br/>10:01:34.997 AM"] -->|"Process chain:<br/>cmd.exe → powershell.exe → net.exe"| D
+    D --> E["Confirmed: Azure Run Command<br/>executed script49.ps1 as SYSTEM,<br/>policy bypass, backdoor created"]
+
+    classDef source fill:#e0e7ff,stroke:#4338ca,stroke-width:2px,color:#1e1b4b
+    classDef result fill:#fef3c7,stroke:#d97706,stroke-width:2px,color:#78350f
+    class A,B,C source
+    class D,E result
+```
 ---
 
 **10:01:34 AM** — Payload Execution (LAW-SilentCorridor)
