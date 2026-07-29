@@ -38,7 +38,7 @@ This is a live-incident case, not a flag hunt. Each phase documents the question
 ```mermaid
 
 graph LR
-    A["Attacker<br/>4.153.100.221"] -->|Compromises| B["Service Principal<br/>Compromised"]
+    A["Attacker<br/>4.153.100.221"] -->|Leverages Compromised Identity| B["Service Principal<br/>Compromised"]
     B -->|Azure Run Command| C["GF-WS01<br/>Initial Foothold"]
     C -->|script49.ps1 / SYSTEM| D["Persistence<br/>Established"]
     C -->|Lateral Movement| E["GF-SRV01<br/>Compromised"]
