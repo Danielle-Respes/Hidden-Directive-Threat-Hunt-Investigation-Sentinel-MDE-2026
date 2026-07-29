@@ -742,14 +742,73 @@ Set-Acl -AclObject $acl 'AD:CN=AdminSDHolder,CN=System,DC=greenfield,DC=local'
 </details>
 
 ---
+
 ## C09 — Lateral Movement
 
 Two independent routes converged on `GF-SRV01`, then pivoted through `GF-DC01`, which served as the persistent internal authentication hub for the rest of the operation.
 
-| | |
+| Category | Details |
 |---|---|
 | **Attack Method** | Route 1: `GF-SRV01$` computer account (Pass-the-Hash) from 10.1.0.169. Route 2: `t.harris` domain user from 10.1.0.120. Both later authenticated to `GF-DC01` via Kerberos (TGT/TGS) and Overpass-the-Hash |
 | **Impact** | Attacker gained a foothold on `GF-SRV01` from two separate paths, then used `GF-DC01` as the pivot for all subsequent authentication — including additional compromised accounts `m.smith` and backdoor `sancadmin` |
+| **MITRE ATT&CK** | **T1550.002** (Pass the Hash) · **T1550.003** (Pass the Ticket / Overpass-the-Hash) · **T1021.002** (SMB/Windows Admin Shares) |
+
+### Lateral Movement Process Flow
+
+```mermaid
+graph TB
+    Title["Attack Date: July 4, 2026"]
+    Title --> L1["LAW-Cyber-Range<br/>(Azure & Cloud Logs)"]
+    Title --> L2["LAW-SilentCorridor<br/>(WindowsAuth_CL)"]
+    Title --> L3["Defender XDR<br/>(Device Timeline)"]
+
+    L1 --> A1["No Lateral Movement Events Captured<br/>(Out of Scope for Workspace)"]
+
+    L2 --> R1["Route 1: Machine-to-Machine<br/>10:01:48 AM<br/>GF-SRV01$ from 10.1.0.169<br/>Pass-the-Hash"]
+    L2 --> R2["Route 2: Human Account<br/>11:10:00 AM<br/>t.harris from 10.1.0.120"]
+    L3 --> R2
+
+    R1 --> D["Both Converge on GF-DC01<br/>11:10:04 AM"]
+    R2 --> D
+
+    D --> K1["EventID 4768/4769<br/>Kerberos TGT/TGS<br/>Overpass-the-Hash"]
+    D --> K2["EventID 4624<br/>t.harris successful logon"]
+    D --> K3["EventID 4771<br/>Failed pre-auth from 10.1.0.169<br/>Suspicious"]
+
+    K1 --> P["GF-DC01 Confirmed as<br/>Persistent Authentication Pivot"]
+    K2 --> P
+    K3 --> P
+
+    P --> M1["m.smith logs into GF-SRV01<br/>from 10.1.0.133"]
+    P --> M2["sancadmin backdoor<br/>accesses GF-DC01"]
+
+    classDef source fill:#e0e7ff,stroke:#4338ca,color:#1e1b4b
+    classDef empty fill:#f3f4f6,stroke:#9ca3af,stroke-dasharray: 5 5,color:#6b7280
+    classDef route fill:#dbeafe,stroke:#2563eb,color:#1e3a8a
+    classDef event fill:#fce7f3,stroke:#db2777,color:#831843
+    classDef result fill:#fef3c7,stroke:#d97706,color:#78350f
+    classDef account fill:#fee2e2,stroke:#dc2626,color:#7f1d1d
+
+    class L1,L2,L3 source
+    class A1 empty
+    class R1,R2 route
+    class K1,K2,K3 event
+    class D,P result
+    class M1,M2 account
+```
+
+
+### Cross-SIEM Validation: LAW-SilentCorridor vs Defender XDR
+
+**Key Finding:** Authentication (11:10:04 AM) and destination file access (11:10:49 AM) are captured 45 seconds apart across different sources, confirming the full lateral movement chain from login to file access.
+
+| Source | Timestamp | Technical Detail | In Plain Words |
+|---|---|---|---|
+| **LAW-SilentCorridor** | 11:10:04 AM | EventID 4768/4769 (Kerberos TGT/TGS) | Shows how the attacker authenticated — Kerberos Overpass-the-Hash |
+| **Defender XDR (GF-DC01)** | 11:10:04 AM | Kerberos ticket requests | Confirms the domain controller processed the authentication |
+| **Defender XDR (GF-SRV01)** | 11:10:49 AM | SMB file open attempts by `t.harris` | Confirms the attacker actually reached and opened files on the target host |
+
+Together, these sources confirm the full lateral movement chain: LAW-SilentCorridor shows how the attacker authenticated, Defender XDR shows what they did once they arrived.
 
 <details>
 <summary><b>→ Full Evidence</b></summary>
@@ -772,6 +831,9 @@ Two independent routes converged on `GF-SRV01`, then pivoted through `GF-DC01`, 
 </details>
 
 ---
+
+
+
 ## C10 — Command and Control
 
 C2 infrastructure disguised as a legitimate CDN, using HTTPS and clean domain reputation to evade detection.
