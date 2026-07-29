@@ -36,7 +36,6 @@ This is a live-incident case, not a flag hunt. Each phase documents the question
 ## Attack Flow Diagram
 
 ```mermaid
-
 graph LR
     A["Attacker<br/>4.153.100.221"] -->|Leverages Compromised Identity| B["Service Principal<br/>Compromised"]
     B -->|Azure Run Command| C["GF-WS01<br/>Initial Foothold"]
@@ -54,9 +53,6 @@ graph LR
     class C foothold
     class D persistence
     class E,F compromised
-```
-
----
 ```
 
 ---
@@ -488,10 +484,69 @@ Located via Defender XDR → Device Timeline → Process Events + Scheduled Task
 
 `sancadmin` stole a SYSTEM process's access token and assigned it to another process, spawning `cmd.exe` running as `NT AUTHORITY\SYSTEM`.
 
-| | |
-|---|---|
-| **Attack Method** | Modified `StoreDesktopExtension.exe`'s access token (`SeImpersonatePrivilege`/`SeAssignPrimaryTokenPrivilege`) and assigned it to `CollectGuestLogs.exe` |
-| **Impact** | `CollectGuestLogs.exe` inherited the stolen token and spawned `cmd.exe` as full SYSTEM — no new services or run keys, bypassing standard persistence detections |
+| Category | Details |
+| :---: | :---: |
+| **Attack Method** | Access Token Manipulation (`SeImpersonatePrivilege` / `SeAssignPrimaryTokenPrivilege`) stolen from `StoreDesktopExtension.exe` |
+| **Execution Path** | Token assigned to `CollectGuestLogs.exe`, spawning `cmd.exe` as `NT AUTHORITY\SYSTEM` |
+| **Impact & Stealth** | Bypassed standard persistence & service creation detections; full SYSTEM privileges achieved |
+| **MITRE ATT&CK** | **T1134** (Access Token Manipulation) · **T1574** (Hijack Execution Flow) |
+
+### Key Evidence & Telemetry Logs
+
+| Timestamp | Source Log | Event Details |
+| :---: | :---: | :--- |
+| **9:55:00.341 PM** | `Defender XDR (DeviceEvents)` | `ProcessPrimaryTokenModification` detected on `StoreDesktopExtension.exe` by user `gf-ws01\sancadmin` |
+| **9:55:00.412 PM** | `Defender XDR (DeviceProcessEvents)` | Token assigned to host process `CollectGuestLogs.exe` |
+| **9:55:00.500 PM** | `LAW-SilentCorridor (WindowsProcess_CL)` | `CollectGuestLogs.exe` spawned `cmd.exe` running under `NT AUTHORITY\SYSTEM`, launched with a named pipe as stdin (`CmdExecutionWithStdInNamedPipe`) |
+
+---
+
+### Privilege Escalation Process Flow
+
+```mermaid
+graph TB
+    Title["Attack Date: July 4, 2026"]
+    Title --> L1["LAW-Cyber-Range<br/>(Azure & Cloud Logs)"]
+    Title --> L2["LAW-SilentCorridor<br/>(WindowsProcess_CL)"]
+    Title --> L3["Defender XDR<br/>(DeviceEvents & DeviceProcessEvents)"]
+
+    L1 --> A1["No Token Events Captured<br/>(Out of Scope for Workspace)"]
+
+    L2 --> B1["9:55:00.500 PM<br/>CollectGuestLogs.exe spawned<br/>cmd.exe as SYSTEM"]
+
+    L3 --> C1["9:55:00.341 PM<br/>ProcessPrimaryTokenModification<br/>StoreDesktopExtension.exe"]
+    L3 --> C2["9:55:00.412 PM<br/>Token Assigned to<br/>CollectGuestLogs.exe"]
+
+    B1 & C1 & C2 --> D["Confirmed Privilege Escalation Chain"]
+
+    D --> Foothold["Initial Foothold<br/>gf-ws01\sancadmin"]
+    Foothold -->|Executes Tool| TargetProc["Target Process<br/>StoreDesktopExtension.exe"]
+    TargetProc -->|Stolen Token<br/>SeImpersonatePrivilege| Token["Access Token<br/>NT AUTHORITY\SYSTEM"]
+    Token -->|Assigns Token to| HostProc["Host Process<br/>CollectGuestLogs.exe"]
+    HostProc -->|Spawns Shell| Shell["cmd.exe<br/>Full SYSTEM Access"]
+
+    classDef source fill:#e0e7ff,stroke:#4338ca,color:#1e1b4b
+    classDef empty fill:#f3f4f6,stroke:#9ca3af,stroke-dasharray: 5 5,color:#6b7280
+    classDef finding fill:#fce7f3,stroke:#db2777,color:#831843
+    classDef result fill:#fef3c7,stroke:#d97706,color:#78350f
+    classDef system fill:#fee2e2,stroke:#dc2626,stroke-width:2px,color:#7f1d1d
+
+    class L1 source
+    class L2,L3 source
+    class A1 empty
+    class B1,C1,C2 finding
+    class D,Foothold,TargetProc,HostProc,Token result
+    class Shell system
+```
+
+### Cross-SIEM Validation: LAW-SilentCorridor vs Defender XDR
+
+| Source | Found? | What It Shows |
+|---|---|---|
+| **LAW-SilentCorridor** | Partial | Logged process creation (`cmd.exe`), but missed the underlying token modification event |
+| **Defender XDR** | Found | Captured explicit `ProcessPrimaryTokenModification` event at 9:55:00.341 PM |
+
+**Key Finding:** Token manipulation is visible only in Defender XDR — LAW-SilentCorridor's process telemetry has no equivalent event type. Privilege escalation via token theft requires endpoint detection (MDE), not just process logs.
 
 <details>
 <summary><b>→ Full Evidence</b></summary>
@@ -499,15 +554,25 @@ Located via Defender XDR → Device Timeline → Process Events + Scheduled Task
 **Initial Access:** Jul 4, 2026 9:55:00.341 PM | **User:** gf-ws01\sancadmin | **Action:** Token Modified
 **Escalation to SYSTEM:** Jul 4, 2026 9:55:00.500 PM | **User:** NT AUTHORITY\SYSTEM | **Action:** Process Created
 
+
+**Privilege Escalation Chain:**
 ![Defender Timeline: Privilege Escalation Chain](evidence/c05-privilege-escalation.png)
 
-Process Chain: services.exe → WaAppAgent.exe → CollectGuestLogs.exe → cmd.exe
 
-**Why stealthy:** No service installation or modification events generated — standard detection misses it.
+**Full Token Modification and Process Chain:**
+<img width="1440" height="510" alt="Defender" src="https://github.com/user-attachments/assets/23940bbb-853f-4c66-a024-85e8e4a753a4" />
+
+
+Process Chain: services.exe → WaAppAgent.exe → CollectGuestLogs.exe → cmd.exe → conhost.exe
+
+**Why stealthy:** No service installation or modification events generated — standard detection misses it. `cmd.exe` was also launched with a named pipe as stdin (`CmdExecutionWithStdInNamedPipe`), consistent with remote command execution tooling rather than interactive use.
+</details>
+
 
 **MITRE ATT&CK:** T1134 (Access Token Manipulation) + T1574 (DLL Side-Loading)
 
-</details>
+
+
 
 ---
 
