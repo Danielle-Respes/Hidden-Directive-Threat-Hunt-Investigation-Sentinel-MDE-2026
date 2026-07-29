@@ -118,8 +118,6 @@ AzureActivity
 
 ---
 
----
-
 ### How to Explain This Phase Simply
 
 | | |
