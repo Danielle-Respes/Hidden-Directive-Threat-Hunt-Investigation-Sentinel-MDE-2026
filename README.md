@@ -4,7 +4,7 @@
 # Hidden Directive — DFIR Investigation 
 
 
-![Status](https://img.shields.io/badge/status-in%20progress-yellow)
+![Status](https://img.shields.io/badge/status-complete-brightgreen)
 ![Tool](https://img.shields.io/badge/Microsoft%20Sentinel-SIEM-blue)
 ![Tool](https://img.shields.io/badge/Defender%20XDR-Endpoint%20Telemetry-informational)
 ![Query](https://img.shields.io/badge/KQL-Kusto%20Query%20Language-0078D4)
@@ -45,33 +45,34 @@ graph LR
     A["Attacker<br/>4.153.100.221"] -->|Azure Run Command| B["Service Principal<br/>Compromised"]
     B -->|script49.ps1 / SYSTEM| C["GF-WS01<br/>Initial Foothold"]
     C -->|Backdoor Admin| D["Persistence<br/>Established"]
-    C -.->|Lateral Movement| E["GF-SRV01<br/>In Progress"]
-    C -.->|Lateral Movement| F["GF-DC01<br/>In Progress"]
+    C -->|Lateral Movement| E["GF-SRV01<br/>Compromised"]
+    C -->|Lateral Movement| F["GF-DC01<br/>Compromised"]
 
     classDef attacker fill:#fee2e2,stroke:#dc2626,stroke-width:2px,color:#7f1d1d
     classDef compromised fill:#fef3c7,stroke:#d97706,stroke-width:2px,color:#78350f
     classDef foothold fill:#e0e7ff,stroke:#4338ca,stroke-width:2px,color:#1e1b4b
     classDef persistence fill:#fce7f3,stroke:#db2777,stroke-width:2px,color:#831843
-    classDef inprogress fill:#f3f4f6,stroke:#6b7280,stroke-width:2px,stroke-dasharray:5 5,color:#374151
 
     class A attacker
     class B compromised
     class C foothold
     class D persistence
-    class E,F inprogress
+    class E,F compromised
 ```
 
----
-
-## Technical Stack
-- **SIEM:** Microsoft Sentinel
-- **Endpoint telemetry:** Microsoft Defender XDR
-- **Query language:** KQL (Kusto Query Language)
-
 
 ---
 
 
+
+## Report Submission
+
+**Case:** GF-INC-2026-0704
+**Analyst:** Danielle R
+**Date:** August 1, 2026
+**Telemetry sources used:** LAW-SilentCorridor, LAW-Cyber-Range
+
+---
 
 ## Investigation
 
