@@ -22,8 +22,8 @@ This is a live-incident case, not a flag hunt. Each phase documents the question
 | Category | Details |
 | :--- | :--- |
 | **Initial Access Vector** | Compromised Azure Service Principal (`5deb2a08...`) via Run Command |
-| **Impact & Breadth** | `SYSTEM`-level code execution on `GF-WS01` & backdoor persistence established |
-| **Scope & Telemetry** | 3 endpoints (`GF-WS01`, `GF-SRV01`, `GF-DC01`) · Microsoft Sentinel & Defender XDR |
+| **Impact & Breadth** | Full domain compromise — SYSTEM-level execution on `GF-WS01` escalated through credential theft and lateral movement to `GF-SRV01` and `GF-DC01`, ending in AD backdoor persistence, password vault and domain data exfiltration, and two independent backdoors that survive password resets |
+| **Scope & Telemetry** | 3 endpoints (`GF-WS01`, `GF-SRV01`, `GF-DC01`) · Microsoft Sentinel (`LAW-SilentCorridor`, `LAW-Cyber-Range`) & Defender XDR |
 
 ---
 
