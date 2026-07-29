@@ -134,7 +134,15 @@ AzureActivity
 | **LAW-SilentCorridor** | 7/4/2026, 10:01:34.963 AM | Full command line: `"cmd" /Powershell -ExecutionPolicy Unrestricted -File script49.ps1` |
 | **Defender XDR** | 7/4/2026, 10:01:34.997 AM | Process chain: `cmd.exe → powershell.exe → net.exe`, user `NT AUTHORITY\SYSTEM` |
 
-**Why both matter:** LAW-SilentCorridor's KQL shows the exact command line — including the `-ExecutionPolicy Unrestricted` flag proving the attacker deliberately bypassed PowerShell's execution policy — but doesn't visualize the process chain. Defender XDR's Device Timeline shows the reverse: the full `cmd.exe → powershell.exe → net.exe` chain and confirms SYSTEM-level privilege, but doesn't surface the execution-policy flag. Together they confirm the initial access method: Azure VM Run Command execution with policy bypass, leading to backdoor account creation.
+
+**Why both matter:**
+
+| Source | Confirms |
+|---|---|
+| **LAW-SilentCorridor** | Exact command line, proving policy bypass (`-ExecutionPolicy Unrestricted`) |
+| **Defender XDR** | Visual process chain, confirming SYSTEM privilege (`cmd.exe → powershell.exe → net.exe`) |
+
+Together, both sources confirm the initial access method: Azure Run Command execution with policy bypass, leading to backdoor account creation.
 
 
 ```mermaid
