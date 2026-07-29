@@ -623,17 +623,6 @@ graph TD
 | **Impact** | Attacker gained visibility into `GREENFIELD\m.smith`'s stored credentials, dumped the KeePass password vault, and targeted the `svc_backup` service account for privilege escalation |
 | **MITRE ATT&CK** | **T1555** (Credentials from Password Stores) · **T1003** (OS Credential Dumping — preparation) · **T1087** (Account Discovery) |
 
-### Key Evidence & Telemetry Logs
-
-| Timestamp | Source Log | Event Details |
-| :---: | :---: | :--- |
-| **9:15:01 AM** | `LAW-SilentCorridor` | `cmdkey /add:GF-SRV01 /user:GREENFIELD\m.smith` — adding stored credentials |
-| **10:04:50 AM** | `LAW-SilentCorridor` | `KeePass.exe --preload` — password manager launched |
-| **11:25:03 AM** | `LAW-SilentCorridor` | `cmdkey /list` — enumerating stored credentials |
-| **11:32:41 AM** | `LAW-SilentCorridor` | `Get-ADUser svc_backup -Properties Description,ServicePrincipalNames` — targeting service account |
-| **11:57:54 AM** | `LAW-SilentCorridor` | `cmdkey /list` — repeated credential enumeration |
-| **12:08:26 PM** | `LAW-SilentCorridor` | `tasklist \| findstr lsass` — prepping for LSASS dump |
-
 ---
 
 ### Credential Access Process Flow
@@ -676,21 +665,29 @@ graph TB
     class Step1,Step2,Step3,Step4 step
 ```
 
-### Cross-SIEM Validation: LAW-SilentCorridor vs Defender XDR
+---
+### Key Evidence & Telemetry Logs
 
-| Source | Found? | What It Shows |
-|---|---|---|
-| **LAW-SilentCorridor** | Found | Full credential access command lines (`cmdkey`, `KeePass`, `Get-ADUser svc_backup`) |
-| **Defender XDR** | Not found | No detailed command execution visible for the credential access phase |
+| Timestamp | Source Log | Event Details |
+| :---: | :---: | :--- |
+| **9:15:01 AM** | `LAW-SilentCorridor` | `cmdkey /add:GF-SRV01 /user:GREENFIELD\m.smith` — adding stored credentials |
+| **10:04:50 AM** | `LAW-SilentCorridor` | `KeePass.exe --preload` — password store discovery & password manager execution |
+| **11:25:03 AM** | `LAW-SilentCorridor` | `cmdkey /list` — enumerating stored Windows credentials |
+| **11:32:41 AM** | `LAW-SilentCorridor` | `Get-ADUser svc_backup -Properties Description,ServicePrincipalNames` — service account target discovery |
+| **11:57:54 AM** | `LAW-SilentCorridor` | `cmdkey /list` — repeated stored credential enumeration |
+| **12:08:26 PM** | `LAW-SilentCorridor` | `tasklist \| findstr lsass` — prepping for LSASS memory dump |
 
-**Key Finding:** Detailed command execution is visible only in LAW-SilentCorridor — Defender XDR's Device Timeline captures high-level process events, but not the actual command arguments needed for this kind of forensic detail.
+---
 
-<details>
-<summary><b>→ Full Evidence</b></summary>
+### Cross-SIEM Validation: LAW-SilentCorridor vs Defender XDR vs LAW-Cyber-Range
 
-**Password vault discovery:** `sancadmin` created `keepass.zip` on GF-WS01 shortly after the credential enumeration above (see C11 for staging/exfiltration details).
+| Source | Found? | Reason |
+| :--- | :---: | :--- |
+| **LAW-Cyber-Range** | Not found | Password and credential discovery occurred at the host level, outside the scope of Azure cloud logs |
+| **Defender XDR** | Partial | Logged high-level process execution (`KeePass.exe`, `cmdkey.exe`), but lacked the command-line arguments required to prove password vault discovery |
+| **LAW-SilentCorridor** | Found | ASIM `WindowsProcess_CL` captured full command lines and arguments (`--preload`, `/add`, `svc_backup`) |
 
-</details>
+**Key Finding:** While Defender XDR observed the password manager and credential utilities launching, only LAW-SilentCorridor provided the full command-line arguments required to confirm password store discovery and credential harvesting.
 
 ---
 ## C08 — Discovery
