@@ -10,7 +10,7 @@
 ![Query](https://img.shields.io/badge/KQL-Kusto%20Query%20Language-0078D4)
 
 **Tools:** Microsoft Sentinel · Defender XDR · KQL
-**Author:** Danielle Respes · [LinkedIn](https://www.linkedin.com/in/danielle-respes-64113767/)
+**Author:** Danielle R · [LinkedIn](https://www.linkedin.com/in/danielle-respes-64113767/)
 
 ## About this case
 On 4 July 2026, GF-WS01 at Greenfield Logistics triggered alerts, the MSSP escalated, and a P1 incident was declared. I worked it as a full DFIR investigation across three hosts — GF-WS01, GF-SRV01, GF-DC01 — reconstructing initial access, lateral movement, and impact, every claim cited to telemetry.
