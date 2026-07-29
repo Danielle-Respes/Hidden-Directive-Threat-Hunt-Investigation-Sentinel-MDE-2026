@@ -1,8 +1,6 @@
 <img width="1017" height="362" alt="Screenshot 2026-07-10 at 7 14 45 PM" src="https://github.com/user-attachments/assets/6e1266d4-43ed-4ea8-aecb-d6aaeca1de69" />
 
-
 # Hidden Directive — DFIR Investigation 
-
 
 ![Status](https://img.shields.io/badge/status-complete-brightgreen)
 ![Tool](https://img.shields.io/badge/Microsoft%20Sentinel-SIEM-blue)
@@ -17,9 +15,7 @@ On 4 July 2026, GF-WS01 at Greenfield Logistics triggered alerts, the MSSP escal
 
 This is a live-incident case, not a flag hunt. Each phase documents the question, the query, the finding, and the reasoning.
 
-
 ---
-
 
 ### Executive Summary
 
@@ -34,7 +30,6 @@ This is a live-incident case, not a flag hunt. Each phase documents the question
 ## Full breakdown of each phase below:
 
 <img width="1536" height="1024" alt="ChatGPT Image Jul 27, 2026, 12_58_16 PM" src="https://github.com/user-attachments/assets/2820f30c-8505-454a-850f-901d0c89767a" />
-
 
 ---
 
@@ -60,10 +55,7 @@ graph LR
     class E,F compromised
 ```
 
-
 ---
-
-
 
 ## Report Submission
 
@@ -77,6 +69,7 @@ graph LR
 ## Investigation
 
 *Phases documented below as I work them.*
+
 ## C01 — Access & Environment
 
 **Goal:** Confirm access to the telemetry, scope queries to the three in-scope hosts and the incident window.
