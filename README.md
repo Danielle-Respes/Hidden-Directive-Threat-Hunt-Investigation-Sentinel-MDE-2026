@@ -596,57 +596,85 @@ Attacker injected code into a trusted, Microsoft-signed process to quietly disab
 </details>
 
 ---
-
-
-
 ## C07 — Credential Access: Multi-Vector Credential Harvesting
 
-<img width="1536" height="1024" alt="Cartoon of summary of story" src="https://github.com/user-attachments/assets/dae2e56a-25d0-4104-84ae-e3c4f6e3592a" />
+<img width="1536" height="1024" alt="Cartoon illustration summarizing credential harvesting" src="https://github.com/user-attachments/assets/dae2e56a-25d0-4104-84ae-e3c4f6e3592a" />
 The short version: the attacker found a password safe, opened it, and walked out with the keys to the whole network.
+
+| Category | Details |
+| :---: | :---: |
+| **Attack Method** | Credential enumeration and harvesting across multiple vectors: stored credentials, password manager, and AD service accounts |
+| **Impact** | Attacker gained visibility into `GREENFIELD\m.smith`'s stored credentials, dumped the KeePass password vault, and targeted the `svc_backup` service account for privilege escalation |
+| **MITRE ATT&CK** | **T1555** (Credentials from Password Stores) · **T1003** (OS Credential Dumping — preparation) · **T1087** (Account Discovery) |
+
+### Key Evidence & Telemetry Logs
+
+| Timestamp | Source Log | Event Details |
+| :---: | :---: | :--- |
+| **9:15:01 AM** | `LAW-SilentCorridor` | `cmdkey /add:GF-SRV01 /user:GREENFIELD\m.smith` — adding stored credentials |
+| **10:04:50 AM** | `LAW-SilentCorridor` | `KeePass.exe --preload` — password manager launched |
+| **11:25:03 AM** | `LAW-SilentCorridor` | `cmdkey /list` — enumerating stored credentials |
+| **11:32:41 AM** | `LAW-SilentCorridor` | `Get-ADUser svc_backup -Properties Description,ServicePrincipalNames` — targeting service account |
+| **11:57:54 AM** | `LAW-SilentCorridor` | `cmdkey /list` — repeated credential enumeration |
+| **12:08:26 PM** | `LAW-SilentCorridor` | `tasklist \| findstr lsass` — prepping for LSASS dump |
 
 ---
 
-| | |
-|---|---|
-| **Attack Method** | LSASS memory dump, `cmdkey.exe` vault enumeration, KeePass database extraction, and `Get-ADUser` description scraping |
-| **Impact** | Harvested Domain Admin credentials to enable lateral movement across the internal network |
+### Credential Access Process Flow
 
 ```mermaid
-graph LR
-    subgraph Escalation["Privilege Escalation"]
-        A["SYSTEM Access<br/>Achieved"]
-    end
-    subgraph Harvest["Credential Harvesting"]
-        B["LSASS Memory Dump<br/>T1003.001"]
-        F["Credential Manager<br/>cmdkey.exe · T1555"]
-        G["KeePass Database<br/>Dumped · T1555.003"]
-        H["AD Description Field<br/>via Get-ADUser · T1087.002"]
-    end
-    subgraph Exploit["Exploitation"]
-        C["Domain Admin<br/>Credentials Harvested"]
-    end
-    subgraph Impact["Impact"]
-        D["Domain Admin<br/>Access Gained"]
-        E["Lateral Movement<br/>→ DC01"]
-    end
-    A --> B
-    A --> F
-    A --> G
-    A --> H
-    B --> C
-    F --> C
-    G --> C
-    H --> C
-    C --> D
-    D --> E
-    classDef escalation fill:#fef3c7,stroke:#d97706,stroke-width:2px,color:#78350f
-    classDef harvest fill:#fee2e2,stroke:#dc2626,stroke-width:2px,color:#7f1d1d
-    classDef impact fill:#f3e8ff,stroke:#9333ea,stroke-width:2px,color:#581c87
-    class A escalation
-    class B,F,G,H harvest
-    class C,D,E impact
+graph TB
+    Title["Attack Date: July 4, 2026"]
+    Title --> L1["LAW-Cyber-Range<br/>(Azure & Cloud Logs)"]
+    Title --> L2["LAW-SilentCorridor<br/>(WindowsProcess_CL)"]
+    Title --> L3["Defender XDR<br/>(Device Timeline)"]
+
+    L1 --> A1["No Credential Access Events Captured<br/>(Out of Scope for Workspace)"]
+    L3 --> A2["No Command-Line Detail Captured<br/>(High-Level Process Events Only)"]
+
+    L2 --> B1["9:15:01 AM<br/>cmdkey adds credentials<br/>for GREENFIELD\m.smith"]
+    L2 --> B2["10:04:50 AM<br/>KeePass.exe launched"]
+    L2 --> B3["11:32:41 AM<br/>Get-ADUser svc_backup<br/>targeted"]
+    L2 --> B4["12:08:26 PM<br/>tasklist searches for lsass"]
+
+    B1 --> D["Confirmed Credential<br/>Harvesting Chain"]
+    B2 --> D
+    B3 --> D
+    B4 --> D
+
+    D --> Step1["Step 1<br/>Stored Credentials Harvested<br/>GREENFIELD\m.smith"]
+    Step1 --> Step2["Step 2<br/>KeePass Vault Opened"]
+    Step2 --> Step3["Step 3<br/>AD Service Account Targeted<br/>svc_backup"]
+    Step3 --> Step4["Step 4<br/>LSASS Dump Preparation"]
+
+    classDef source fill:#e0e7ff,stroke:#4338ca,color:#1e1b4b
+    classDef empty fill:#f3f4f6,stroke:#9ca3af,stroke-dasharray: 5 5,color:#6b7280
+    classDef finding fill:#fce7f3,stroke:#db2777,color:#831843
+    classDef result fill:#fef3c7,stroke:#d97706,color:#78350f
+    classDef step fill:#fee2e2,stroke:#dc2626,stroke-width:2px,color:#7f1d1d
+
+    class L1,L2,L3 source
+    class A1,A2 empty
+    class B1,B2,B3,B4 finding
+    class D result
+    class Step1,Step2,Step3,Step4 step
 ```
- 
+
+### Cross-SIEM Validation: LAW-SilentCorridor vs Defender XDR
+
+| Source | Found? | What It Shows |
+|---|---|---|
+| **LAW-SilentCorridor** | Found | Full credential access command lines (`cmdkey`, `KeePass`, `Get-ADUser svc_backup`) |
+| **Defender XDR** | Not found | No detailed command execution visible for the credential access phase |
+
+**Key Finding:** Detailed command execution is visible only in LAW-SilentCorridor — Defender XDR's Device Timeline captures high-level process events, but not the actual command arguments needed for this kind of forensic detail.
+
+<details>
+<summary><b>→ Full Evidence</b></summary>
+
+**Password vault discovery:** `sancadmin` created `keepass.zip` on GF-WS01 shortly after the credential enumeration above (see C11 for staging/exfiltration details).
+
+</details>
 
 ---
 ## C08 — Discovery
