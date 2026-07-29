@@ -136,7 +136,7 @@ AzureActivity
 | **LAW-SilentCorridor** | 10:01:34.963 AM | Full command line: `"cmd" /Powershell -ExecutionPolicy Unrestricted -File script49.ps1` | Proves the attacker turned off PowerShell's safety checks on purpose |
 | **Defender XDR** | 10:01:34.997 AM | Process chain: `cmd.exe → powershell.exe → net.exe`, user `NT AUTHORITY\SYSTEM` | Shows exactly what that command did next, with full system privileges |
 
-Together, both sources confirm the initial access method: Azure Run Command execution with policy bypass, leading to backdoor account creation.
+Together, these log sources confirm the initial access method: Azure Run Command execution with policy bypass leading to backdoor account creation.
 
 ```mermaid
 graph TB
