@@ -160,31 +160,65 @@ Visual process chain — confirms SYSTEM privilege:
 
 Together, both sources confirm the initial access method: Azure Run Command execution with policy bypass, leading to backdoor account creation.
 
-
-
 ```mermaid
 graph TB
-    A["LAW-Cyber-Range<br/>Azure Activity Log<br/>8:01 AM"] -->|"Caller: 5deb2a08...<br/>IP: 4.153.100.221"| D["Same Event:<br/>script49.ps1 Execution<br/>10:01:34 AM"]
-    B["LAW-SilentCorridor<br/>Windows Process Telemetry<br/>10:01:34.963 AM"] -->|"Full command line +<br/>-ExecutionPolicy Unrestricted flag"| D
-    C["Defender XDR<br/>Device Timeline<br/>10:01:34.997 AM"] -->|"Process chain:<br/>cmd.exe → powershell.exe → net.exe"| D
-    D --> E["Confirmed: Azure Run Command<br/>executed script49.ps1 as SYSTEM,<br/>policy bypass, backdoor created"]
+    Title["Attack Date: July 4, 2026"]
+    Title --> A[LAW-Cyber-Range: Azure Log 8:01 AM]
+    Title --> B[LAW-SilentCorridor: Process Log 10:01:34.963 AM]
+    Title --> C[Defender XDR: Device Timeline 10:01:34.997 AM]
 
-    classDef source fill:#e0e7ff,stroke:#4338ca,stroke-width:2px,color:#1e1b4b
-    classDef result fill:#fef3c7,stroke:#d97706,stroke-width:2px,color:#78350f
+    A --> A1[Azure Run Command from 4.153.100.221]
+    B --> B1[script49.ps1 run by GF-WS01$ with -ExecutionPolicy Unrestricted]
+    C --> C1[runcommandextension.exe to cmd.exe to powershell.exe to net.exe to net1.exe]
+
+    A1 --> D[Confirmed Chain]
+    B1 --> D
+    C1 --> D
+    D --> E[cmd.exe launches powershell.exe]
+    E --> F[AmsiContentDetails script scan]
+    F --> G[powershell.exe launches net.exe]
+    G --> H[net1.exe enumerates sancadmin group membership]
+
+    classDef source fill:#e0e7ff,stroke:#4338ca,color:#1e1b4b
+    classDef finding fill:#f3f4f6,stroke:#6b7280,color:#111827
+    classDef result fill:#fef3c7,stroke:#d97706,color:#78350f
     class A,B,C source
-    class D,E result
+    class A1,B1,C1 finding
+    class D,E,F,G,H result
+
 ```
+### Why the Times Are Different
+
+Think of this like a text message: you hit send, but it takes a second to arrive and be read. Same idea here, just stretched out.
+
+| Layer | Time | Source | What Happened |
+|---|---|---|---|
+| **1. Cloud command** | 8:01 AM | LAW-Cyber-Range | Attacker's stolen cloud identity sends the command from IP 4.153.100.221 — this is where the attack starts |
+| **2. Host execution** | 10:01:34 AM | LAW-SilentCorridor + Defender XDR | The command actually runs on GF-WS01 — this is where it lands and does damage |
+
+**Why the ~2-hour gap:** the command has to travel from Azure, through the VM's extension, into a queue, before it finally runs on the machine. All three logs are correct — they're just watching different stops on the same trip.
+
+**Why we need all three sources:**
+- **LAW-Cyber-Range** — proves the cloud identity was compromised and shows the attacker's IP
+- **LAW-SilentCorridor** — shows the exact command that ran, including the security bypass
+- **Defender XDR** — shows the visual chain of what that command did next (cmd → powershell → net)
+
+Together, they prove the full path: stolen cloud key → command sent → command runs → attacker gets in.
+
 ---
 
-**10:01:34 AM** — Payload Execution (LAW-SilentCorridor)
+<details>
+<summary><b>→ Raw Query Evidence (KQL)</b></summary>
 
-```kql
+
+**10:01:34 AM — Payload Execution (LAW-SilentCorridor)**
+
 WindowsProcess_CL
 | where DvcHostname == "GF-WS01.greenfield.local"
-| where TargetProcessCommandLine contains "script49.ps1"
-| where ActorUsername == "NT AUTHORITY\SYSTEM"
+| where TargetProcessCommandLine has_any ("net user sancadmin", "net localgroup")
+| where TimeGenerated between (datetime(2026-07-04 10:01:35) .. datetime(2026-07-04 10:01:36))
 | project TimeGenerated, ActorUsername, TargetProcessCommandLine
-```
+
 
 **Result:** PowerShell executes script49.ps1 with SYSTEM privileges and unrestricted execution policy.
 
@@ -207,6 +241,7 @@ WindowsProcess_CL
 10:01:35.783 AM | NT AUTHORITY\SYSTEM | net.exe user sancadmin /active:yes
 
 ---
+</details>
 
 ### MITRE ATT&CK Mapping
 
