@@ -598,8 +598,24 @@ Attacker injected code into a trusted, Microsoft-signed process to quietly disab
 ---
 ## C07 — Credential Access: Multi-Vector Credential Harvesting
 
-<img width="1536" height="1024" alt="Cartoon illustration summarizing credential harvesting" src="https://github.com/user-attachments/assets/dae2e56a-25d0-4104-84ae-e3c4f6e3592a" />
-The short version: the attacker found a password safe, opened it, and walked out with the keys to the whole network.
+```mermaid
+graph TD
+    A["Attacker: sancadmin"] --> B["Stored Credential Staging<br/>cmdkey /add & /list"]
+    A --> C["Password Vault Access<br/>KeePass.exe --preload"]
+    A --> D["AD Account Recon<br/>Get-ADUser svc_backup"]
+    A --> E["LSASS Prep<br/>tasklist | findstr lsass"]
+
+    B & C & D & E --> F["Result: Staged keepass.zip &<br/>Targeted Service Account Credentials"]
+
+    classDef attacker fill:#1f2937,color:#fff,stroke:#3b82f6,stroke-width:2px
+    classDef vector fill:#fce7f3,stroke:#db2777,color:#831843
+    classDef result fill:#991b1b,color:#fff,stroke:#ef4444,stroke-width:2px
+
+    class A attacker
+    class B,C,D,E vector
+    class F result
+```
+
 
 | Category | Details |
 | :---: | :---: |
