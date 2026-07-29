@@ -137,12 +137,29 @@ AzureActivity
 
 **Why both matter:**
 
-| Source | Confirms |
-|---|---|
-| **LAW-SilentCorridor** | Exact command line, proving policy bypass (`-ExecutionPolicy Unrestricted`) |
-| **Defender XDR** | Visual process chain, confirming SYSTEM privilege (`cmd.exe → powershell.exe → net.exe`) |
+<table>
+<tr>
+<td width="50%" valign="top">
+
+**LAW-SilentCorridor**
+
+Exact command line — proves policy bypass:
+`-ExecutionPolicy Unrestricted`
+
+</td>
+<td width="50%" valign="top">
+
+**Defender XDR**
+
+Visual process chain — confirms SYSTEM privilege:
+`cmd.exe → powershell.exe → net.exe`
+
+</td>
+</tr>
+</table>
 
 Together, both sources confirm the initial access method: Azure Run Command execution with policy bypass, leading to backdoor account creation.
+
 
 
 ```mermaid
