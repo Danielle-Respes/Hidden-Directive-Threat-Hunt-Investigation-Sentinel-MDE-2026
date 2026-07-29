@@ -29,8 +29,7 @@ This is a live-incident case, not a flag hunt. Each phase documents the question
 
 ## Full breakdown of each phase below:
 
-<img width="1461" height="1077" alt="ChatGPT Image Jul 29, 2026, 12_39_22 PM" src="https://github.com/user-attachments/assets/b1d4e817-c370-4f28-a9b4-ecce7098f400" />
-
+<img width="1461" height="1077" alt="ChatGPT Image Jul 29, 2026, 12_58_45 PM" src="https://github.com/user-attachments/assets/f61c6b54-9e55-4fb2-b44e-def28d846468" />
 
 
 ---
