@@ -12,6 +12,7 @@ Each entry: source, query run, what the screenshot/export shows, and which phase
 | **File** | `query_data (1).csv` / `query_data (2).csv` (incidents) |
 | **Finding** | Earliest alert "Mass File Rename (Ransomware Indicator)" at **2026-07-04 00:11:33 UTC** — over 7 hours before the previously stated 08:01 UTC start time |
 | **Also shows** | `sancadmin`-attributed "CertUtil-URLCache" alert at 02:07:56 AM; "Scheduled task created... by GF-WS01\sancadmin" at 11:49:19 AM |
+| **C0#** | C02, C04 |
 | **Updates** | C02 (timeline) · investigation-gaps.md (new gap) · C04 (scheduled task corroboration) |
 
 ## 2. Defender Advanced Hunting — DeviceProcessEvents (GF-WS01)
@@ -21,6 +22,7 @@ Each entry: source, query run, what the screenshot/export shows, and which phase
 | **Source** | Defender XDR Advanced Hunting |
 | **File** | `New query.csv` |
 | **Finding** | `sancadmin` actively running desktop-session processes (explorer.exe, OneDrive, etc.) as early as **2026-07-03 8:03:53 PM** — before the incident window entirely |
+| **C0#** | C02, C04 |
 | **Updates** | C02 · C04 (sancadmin origin — reframes as pre-existing account, not new creation) |
 
 ## 3. Defender Advanced Hunting — DeviceRegistryEvents (GF-WS01)
@@ -30,6 +32,7 @@ Each entry: source, query run, what the screenshot/export shows, and which phase
 | **Source** | Defender XDR Advanced Hunting |
 | **File** | `New query (1).csv` |
 | **Finding** | Registry key/task cache activity tied to `sancadmin`, including RegistryValueDeleted/RegistryKeyDeleted events at **8:04:51–8:06:16 PM on 7/3** — consistent with an active, established user profile, not first-time provisioning |
+| **C0#** | C04, C06 |
 | **Updates** | C04 · C06 |
 
 ## 4. LAW-SilentCorridor — WindowsProcess_CL (sancadmin command-line history)
@@ -40,6 +43,7 @@ Each entry: source, query run, what the screenshot/export shows, and which phase
 | **File** | `query_data (3).csv` |
 | **Finding** | `C:\Users\sancadmin\AppData\Local\Temp` referenced in `cmd.exe` activity as early as **2026-07-03 12:45:57 AM UTC** — confirms the `sancadmin` user profile folder existed a full day before the attacker's 10:01:35 AM "net user sancadmin" command on July 4 |
 | **Why it matters** | Strongly indicates account takeover of a pre-existing account, not new account creation |
+| **C0#** | C02, C04 |
 | **Updates** | C02 (correction: "created" → "took over/reactivated") · C04 (Finding 1 correction) · Executive Summary · Incident Overview |
 
 ## 5. LAW-Cyber-Range — AzureActivity (sancadmin / GF-WS01 cross-check)
@@ -49,6 +53,7 @@ Each entry: source, query run, what the screenshot/export shows, and which phase
 | **Source** | Microsoft Sentinel, LAW-Cyber-Range |
 | **Query** | `AzureActivity \| where Caller has "sancadmin" or ResourceGroup has "GF-WS01"` |
 | **Finding** | No results returned — no Azure-side telemetry corroborates on-host sancadmin activity from the cloud control plane |
+| **C0#** | — (no phase doc; cloud-side cross-check only) |
 | **Updates** | investigation-gaps.md (documented as a real telemetry gap, not an error) |
 
 ## 6. MITRE Mapping Correction — T1098 vs T1136
@@ -57,6 +62,7 @@ Each entry: source, query run, what the screenshot/export shows, and which phase
 |---|---|
 | **Source** | This investigation session, reconciling against live GitHub repo |
 | **Finding** | The T1136 (Create Account) label used in the live repo's C02/C04 for sancadmin should be **T1098 (Account Manipulation)** instead — the account already existed as of 2026-07-03 00:45:57 UTC, so the July 4 net user sancadmin command is a password reset/reactivation, not a new account creation |
+| **C0#** | C02, C04 |
 | **Updates** | C02, C04, mitre-mapping.md — MITRE table technique ID correction |
 
 ## 7. Exfiltration Confirmation Status (T1041)
@@ -65,4 +71,5 @@ Each entry: source, query run, what the screenshot/export shows, and which phase
 |---|---|
 | **Source** | This investigation session, reconciling against live GitHub repo |
 | **Finding** | The live GitHub repo's C11 currently states a successful second exfiltration attempt (exfil.zip created on GF-DC01), which would justify a T1041 (Exfiltration Over C2 Channel) row. This session's evidence only confirms keepass.zip was staged, not that data left the network — no DNS/network egress logs support exfiltration. |
+| **C0#** | C11 |
 | **Updates** | investigation-gaps.md, mitre-mapping.md — flag as unresolved until the exfil.zip claim in C11 is backed by matching network/file-transfer telemetry (not just process-creation evidence) |
