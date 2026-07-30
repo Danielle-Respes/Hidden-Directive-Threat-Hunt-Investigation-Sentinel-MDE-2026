@@ -34,7 +34,8 @@ This is a live-incident case, not a flag hunt. Each phase documents the question
 ---
 ## AI Use Disclosure
 
-AI helped draft queries and structure the working docs in this repo. My own
+This is a contest on the cyber range.  AI is allowed to help draft queries and structure the working docs in this repo. However,  
+the investigation and the writeup are the skill, and a pasted AI report is obvious on review.  Therefore, my own
 analysis and writing is in [incident-report.md](./incident-report.md). A
 separate AI-drafted version is kept at
 [reference/ai-reference-report.md](./reference/ai-reference-report.md) for
