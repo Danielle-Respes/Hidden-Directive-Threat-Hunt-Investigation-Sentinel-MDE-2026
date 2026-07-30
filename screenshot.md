@@ -50,3 +50,19 @@ Each entry: source, query run, what the screenshot/export shows, and which phase
 | **Query** | `AzureActivity \| where Caller has "sancadmin" or ResourceGroup has "GF-WS01"` |
 | **Finding** | No results returned — no Azure-side telemetry corroborates on-host sancadmin activity from the cloud control plane |
 | **Updates** | investigation-gaps.md (documented as a real telemetry gap, not an error) |
+
+## 6. MITRE Mapping Correction — T1098 vs T1136
+
+| Field | Detail |
+|---|---|
+| **Source** | This investigation session, reconciling against live GitHub repo |
+| **Finding** | The T1136 (Create Account) label used in the live repo's C02/C04 for sancadmin should be **T1098 (Account Manipulation)** instead — the account already existed as of 2026-07-03 00:45:57 UTC, so the July 4 net user sancadmin command is a password reset/reactivation, not a new account creation |
+| **Updates** | C02, C04, mitre-mapping.md — MITRE table technique ID correction |
+
+## 7. Exfiltration Confirmation Status (T1041)
+
+| Field | Detail |
+|---|---|
+| **Source** | This investigation session, reconciling against live GitHub repo |
+| **Finding** | The live GitHub repo's C11 currently states a successful second exfiltration attempt (exfil.zip created on GF-DC01), which would justify a T1041 (Exfiltration Over C2 Channel) row. This session's evidence only confirms keepass.zip was staged, not that data left the network — no DNS/network egress logs support exfiltration. |
+| **Updates** | investigation-gaps.md, mitre-mapping.md — flag as unresolved until the exfil.zip claim in C11 is backed by matching network/file-transfer telemetry (not just process-creation evidence) |
