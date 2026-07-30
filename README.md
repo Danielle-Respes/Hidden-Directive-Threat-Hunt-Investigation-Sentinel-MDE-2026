@@ -40,6 +40,12 @@ analysis and writing is in [incident-report.md](./incident-report.md). A separat
 
 This is the structure a working SOC lead or DFIR team would recognize. It follows the NIST SP 800-61 incident lifecycle and standard industry reporting practice.
 
+## Report Submission
+
+**Case:** GF-INC-2026-0704
+**Analyst:** Danielle R
+**Date:** August 1, 2026
+**Telemetry sources used:** LAW-SilentCorridor, LAW-Cyber-Range
 ---
 
 ## Attack Flow Diagram
@@ -64,14 +70,6 @@ graph LR
     class E,F compromised
 ```
 
----
-
-## Report Submission
-
-**Case:** GF-INC-2026-0704
-**Analyst:** Danielle R
-**Date:** August 1, 2026
-**Telemetry sources used:** LAW-SilentCorridor, LAW-Cyber-Range
 
 ---
 
