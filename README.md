@@ -944,8 +944,25 @@ graph LR
 ```
 
 **Bottom line**: A single compromised laptop escalated to full control of the company's digital environment — a total domain compromise. Fixing it takes more than a password reset; the backdoors must be found and removed manually.
+---
+## Investigation Status
+- [x] Executive Summary (complete)
+- [x] Investigation Tracker (active)
+- [x] Timeline (drafted)
+- [x] Evidence Log (drafted)
+- [x] MITRE Mapping (drafted)
+- [x] Artifact Analysis (drafted)
+- [x] Remediation Notes (drafted)
+- [ ] Final Report (in progress)
 
-
+## Key Files
+- **Investigation Tracking:** [investigation-tracker.md](./investigation-tracker.md)
+- **Evidence Log:** [evidence-log.md](./evidence-log.md)
+- **Timeline:** [timeline.md](./timeline.md)
+- **MITRE Mapping:** [mitre-mapping.md](./mitre-mapping.md)
+- **Artifact Analysis:** [artifacts-analysis.md](./artifacts-analysis.md)
+- **Gaps & Unknowns:** [investigation-gaps.md](./investigation-gaps.md)
+- **Remediation:** [remediation-draft.md](./remediation-draft.md)
 
 
 ---
