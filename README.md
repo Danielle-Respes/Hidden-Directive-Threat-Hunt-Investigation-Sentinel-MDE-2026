@@ -36,7 +36,8 @@ This is a live-incident case, not a flag hunt. Each phase documents the question
 
 This is a contest on the cyber range.  AI is allowed to help draft queries and structure the working docs in this repo. However,  
 the investigation and the writeup are the skill, and a pasted AI report is obvious on review.  Therefore, my own
-analysis and writing is in [incident-report.md](./incident-report.md). A separate AI-drafted version is kept at [ai-reference-report.md](./ai-reference-report.md) for comparison — not my submission.
+analysis and writing is in [incident-report.md](./incident-report.md). A separate AI-drafted version is kept at [ai-reference-report.md](./ai-reference-report.md) for comparison — not my submission.  
+This is the structure a working SOC lead or DFIR team would recognize. It follows the NIST SP 800-61 incident lifecycle and standard industry reporting practice.
 
 ---
 
