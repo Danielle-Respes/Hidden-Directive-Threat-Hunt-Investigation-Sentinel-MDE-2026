@@ -31,8 +31,14 @@ This is a live-incident case, not a flag hunt. Each phase documents the question
 
 <img width="1920" height="1440" alt="attack-comic-v2" src="https://github.com/user-attachments/assets/5be7421e-0c6c-4f5d-9158-3559f3a0a745" />
 
+---
+## AI Use Disclosure
 
-
+AI helped draft queries and structure the working docs in this repo. My own
+analysis and writing is in [incident-report.md](./incident-report.md). A
+separate AI-drafted version is kept at
+[reference/ai-reference-report.md](./reference/ai-reference-report.md) for
+comparison — not my submission.
 
 ---
 
